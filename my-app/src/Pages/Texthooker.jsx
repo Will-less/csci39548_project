@@ -6,6 +6,7 @@ function Texthooker() {
   //change to array later; we will define page size with indices
   const [text, setText] = useState('');
   const [connected, setConnected] = useState(true);
+  let line = '';
 
   const updateText = async () => {
     try {
@@ -31,7 +32,12 @@ function Texthooker() {
     }
 
     socket.onmessage = (e) => {
-      setText(e.data);
+      line = line + e.data + '\n';
+      setText(line);
+    }
+
+    return () => {
+      socket.close();
     }
 
   }, []);
@@ -48,7 +54,7 @@ function Texthooker() {
 
   return (
     <>
-      <div>
+      <div className="whitespace-pre-wrap">
         {text}
       </div>
     </>
