@@ -1,15 +1,24 @@
 import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom';
 import Home from './Pages/Home';
+import Login from './Pages/Login';
+import Library from './Pages/Library';
+import Texthooker from './Pages/Texthooker';
+import Nil from './Components/Nil';
+
 
 
 function App() {
   return (
-   <>
-	  <Routes>
-	  	<Route path="/" element = {<Home />} />
-	  </Routes>
-   </>
+    <>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/Library" element={<Library />} />
+        <Route path="/Texthooker" element={<Texthooker />} />
+        <Route path="*" element={<Nil />} />
+      </Routes>
+    </>
   )
 }
 
