@@ -5,6 +5,7 @@ const URL = "ws://localhost:6677";
 function Texthooker() {
   //change to array later; we will define page size with indices
   const [text, setText] = useState('');
+  const [connected, setConnected] = useState(true);
 
   const updateText = async () => {
     try {
@@ -20,25 +21,30 @@ function Texthooker() {
 
     socket.onopen = () => {
       console.log("it works");
+      setConnected(true);
     };
+
+    socket.onerror = () => {
+      console.log("starting manual mode");
+      setConnected(false);
+      return;
+    }
 
     socket.onmessage = (e) => {
       setText(e.data);
     }
 
-    socket.onerror = () => {
-      console.log("starting manual mode");
-    }
-
   }, []);
 
   useEffect(() => {
-    window.addEventListener('focus', updateText);
+    if (!connected) {
+      window.addEventListener('focus', updateText);
 
-    return () => {
-      window.removeEventListener('focus', updateText);
-    };
-  }, []);
+      return () => {
+        window.removeEventListener('focus', updateText);
+      };
+    }
+  }, [connected]);
 
   return (
     <>
