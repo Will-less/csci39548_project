@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom';
+
+import NavBar from "./Components/Navbar";
 import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Library from './Pages/Library';
@@ -11,6 +13,7 @@ import Nil from './Components/Nil';
 function App() {
   return (
     <>
+      <NavBar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
