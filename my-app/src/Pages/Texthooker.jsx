@@ -8,15 +8,6 @@ function Texthooker() {
   const [connected, setConnected] = useState(true);
   let line = '';
 
-  const updateText = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      setText(text);
-    } catch (e) {
-      //empty to prevent console spam
-    }
-  };
-
   useEffect(() => {
     const socket = new WebSocket(URL);
 
@@ -25,15 +16,14 @@ function Texthooker() {
       setConnected(true);
     };
 
-    socket.onerror = () => {
-      console.log("starting manual mode");
-      setConnected(false);
-      return;
-    }
-
     socket.onmessage = (e) => {
       line = line + e.data + '\n';
       setText(line);
+    }
+
+    socket.onerror = () => {
+      console.log("starting manual mode");
+      setConnected(false);
     }
 
     return () => {
@@ -41,6 +31,16 @@ function Texthooker() {
     }
 
   }, []);
+
+  const updateText = async () => {
+    try {
+      const clip = await navigator.clipboard.readText();
+      line = line + clip + '\n';
+      setText(line);
+    } catch (e) {
+      //empty to prevent console spam
+    }
+  };
 
   useEffect(() => {
     if (!connected) {
