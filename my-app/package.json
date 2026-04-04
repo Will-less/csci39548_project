@@ -1,7 +1,7 @@
 {
   "name": "my-app",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
+    "express": "^5.2.1",
     "mongodb": "^7.1.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
-
 const URL = "ws://localhost:6677";
 
-function Texthooker() {
-  //change to array later; we will define page size with indices
-  const [text, setText] = useState('');
-  const [connected, setConnected] = useState(true);
-  let line = '';
+//add custom hook to check if it's online
+function SaveButton() {
+  return (
+    <>
+    </>
+  )
+}
 
+function Field({ text, }) {
+
+}
+
+function useTextractor({ setText, setConnected }) {
+  let line = '';
   useEffect(() => {
     const socket = new WebSocket(URL);
 
@@ -31,17 +38,18 @@ function Texthooker() {
     }
 
   }, []);
+}
 
+function useManual({ connected, setText }) {
+  let line = '';
   const updateText = async () => {
     try {
       const clip = await navigator.clipboard.readText();
       line = line + clip + '\n';
       setText(line);
     } catch (e) {
-      //empty to prevent console spam
     }
   };
-
   useEffect(() => {
     if (!connected) {
       window.addEventListener('focus', updateText);
@@ -51,6 +59,16 @@ function Texthooker() {
       };
     }
   }, [connected]);
+}
+
+
+function Texthooker() {
+  //change to array later; we will define page size with indices
+  const [text, setText] = useState('');
+  const [connected, setConnected] = useState(true);
+
+  useTextractor({ setText, setConnected });
+  useManual({ setText, connected });
 
   return (
     <>
