@@ -1,17 +1,6 @@
 import { useState, useEffect } from 'react';
 const URL = "ws://localhost:6677";
 
-//add custom hook to check if it's online
-function SaveButton() {
-  return (
-    <>
-    </>
-  )
-}
-
-function Field({ text, }) {
-
-}
 
 function useTextractor({ setText, setConnected }) {
   let line = '';
@@ -61,6 +50,27 @@ function useManual({ connected, setText }) {
   }, [connected]);
 }
 
+//add css later
+function DropDownMenu() {
+  return (
+    <>
+      <div className="fixed top-10 right-10 bg-mist-500">
+        <SaveButton />
+      </div>
+    </>
+  )
+}
+
+
+//add custom hook to check if it's online
+function SaveButton() {
+  return (
+    <>
+      <button className="text-white">SAVE</button>
+    </>
+  )
+}
+
 
 function Texthooker() {
   //change to array later; we will define page size with indices
@@ -75,6 +85,7 @@ function Texthooker() {
       <div className="whitespace-pre-wrap">
         {text}
       </div>
+      <DropDownMenu />
     </>
   )
 }
