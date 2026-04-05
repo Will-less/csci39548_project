@@ -82,8 +82,10 @@ function Texthooker() {
 
   return (
     <>
-      <div className="whitespace-pre-wrap">
-        {text}
+      <div className="flex justify-center">
+        <div className="whitespace-pre-wrap w-us-width h-us-height">
+          {text}
+        </div>
       </div>
       <DropDownMenu />
     </>

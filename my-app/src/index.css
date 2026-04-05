@@ -1,3 +1,6 @@
 @import "tailwindcss";
 
-
+@theme {
+  --spacing-us-width: 8.5in;
+  --spacing-us-height: 11in;
+}
