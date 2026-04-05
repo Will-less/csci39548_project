@@ -57,9 +57,11 @@ function usePageMaker({ text, setText, textRef }) {
     let sh = textRef.current.scrollHeight;
     let oh = textRef.current.offsetHeight;
 
+    /*
     console.log(sh);
     console.log(oh);
     console.log(text);
+    */
 
     if (sh > oh && text !== '') {
       setText('');
