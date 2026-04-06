@@ -3,18 +3,29 @@ import { useState, useEffect, useRef } from 'react';
 //need Textractor and Textractor websocket to use
 const URL = "ws://localhost:6677";
 
+function getText({ setText, extract }) {
+  setText(prev => {
+    const id = crypto.randomUUID();
+    return {
+      ...prev,
+      page: prev.lineIds.length > prev.pageLimit ? prev.page++ : prev.page,
+      lines: { ...prev.lines, [id]: { text: extract } },
+      lineIds: [...prev.lineIds, id],
+    };
+  });
+}
 
 function useTextractor({ setText, setConnected }) {
   useEffect(() => {
     const socket = new WebSocket(URL);
 
     socket.onopen = () => {
-      console.log("it works");
       setConnected(true);
     };
 
     socket.onmessage = (e) => {
-      setText(text => text + e.data + '\n');
+      let text = e.data;
+      getText({ setText, extract: text });
     }
 
     socket.onerror = () => {
@@ -29,13 +40,13 @@ function useTextractor({ setText, setConnected }) {
   }, []);
 }
 
-function useManual({ connected, text, setText }) {
+function useManual({ connected, setText }) {
   const updateText = async () => {
     try {
-      const clip = await navigator.clipboard.readText();
-      setText(text => text + clip + '\n');
+      let clip = await navigator.clipboard.readText();
+      getText({ setText, extract: clip });
     } catch (e) {
-      console.log(e);
+      //empty to prvent console spam 
     }
   };
   useEffect(() => {
@@ -49,7 +60,7 @@ function useManual({ connected, text, setText }) {
   }, [connected]);
 }
 
-function usePageMaker({ text, setText, textRef }) {
+function usePaginator({ text, textRef }) {
   useEffect(() => {
     if (!textRef.current)
       return;
@@ -57,18 +68,18 @@ function usePageMaker({ text, setText, textRef }) {
     let sh = textRef.current.scrollHeight;
     let oh = textRef.current.offsetHeight;
 
-    /*
     console.log(sh);
     console.log(oh);
-    console.log(text);
-    */
 
-    if (sh > oh && text !== '') {
-      setText('');
+    if (sh > oh) {
+      console.log("hey");
+      textRef.current.scrollBy({
+        top: 1000
+      });
     }
-
   }, [text, textRef]);
 }
+
 
 //add css later
 function DropDownMenu() {
@@ -94,19 +105,29 @@ function SaveButton() {
 
 function Texthooker() {
   //change to array later; we will define page size with indices
-  const [text, setText] = useState('');
   const [connected, setConnected] = useState(true);
+  const [text, setText] = useState({
+    lineIds: [],
+    lines: {},
+    pageLimit: 50,
+    page: 0
+  });
   const textRef = useRef(null);
 
   useTextractor({ setText, setConnected });
-  useManual({ connected, text, setText });
-  usePageMaker({ text, setText, textRef });
+  useManual({ connected, setText });
+  usePaginator({ text, textRef })
 
+  const pageText = text.lineIds.slice(text.page * text.pageLimit, text.page * text.pageLimit + text.pageLimit);
+
+  //keep text-sm - line-height needs to divide 1000 perfectly.
   return (
     <>
       <div className="flex justify-center">
-        <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height">
-          {text}
+        <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-sm overflow-hidden">
+          {pageText.map(ids => (
+            <div key={ids}>{text.lines[ids].text}</div>
+          ))}
         </div>
       </div>
       <DropDownMenu />
