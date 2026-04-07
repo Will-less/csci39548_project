@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --spacing-us-width: 8.5in;
-  --spacing-us-height: 11in;
+  --spacing-us-width: 800px;
+  --spacing-us-height: 1000px;
 }
+
+

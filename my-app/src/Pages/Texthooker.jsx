@@ -2,20 +2,29 @@ import { useState, useEffect, useRef } from 'react';
 
 //need Textractor and Textractor websocket to use
 const URL = "ws://localhost:6677";
+const pageLines = 50;
 
-function getText({ setText, extract }) {
+function getText({ text, setText, extract, setPageText, page, pages }) {
+  const id = crypto.randomUUID();
+
   setText(prev => {
-    const id = crypto.randomUUID();
+    const newLineIds = [...prev.lineIds, id];
+    const newLines = { ...prev.lines, [id]: { text: extract } };
+
+    setPageText(() => {
+      return newLineIds.slice(getPage(page, pages), getPage(page, pages) + pageLines);
+    });
+
     return {
-      ...prev,
-      page: prev.lineIds.length > prev.pageLimit ? prev.page++ : prev.page,
-      lines: { ...prev.lines, [id]: { text: extract } },
-      lineIds: [...prev.lineIds, id],
+      lineIds: newLineIds,
+      lines: newLines,
     };
   });
+
+
 }
 
-function useTextractor({ setText, setConnected }) {
+function useTextractor({ text, setText, setConnected, setPageText, page, pages }) {
   useEffect(() => {
     const socket = new WebSocket(URL);
 
@@ -24,8 +33,8 @@ function useTextractor({ setText, setConnected }) {
     };
 
     socket.onmessage = (e) => {
-      let text = e.data;
-      getText({ setText, extract: text });
+      let exText = e.data;
+      getText({ text: text, setText, extract: exText, setPageText, page, pages });
     }
 
     socket.onerror = () => {
@@ -40,13 +49,13 @@ function useTextractor({ setText, setConnected }) {
   }, []);
 }
 
-function useManual({ connected, setText }) {
+function useManual({ text, connected, setText, setPageText, page, pages }) {
   const updateText = async () => {
     try {
       let clip = await navigator.clipboard.readText();
-      getText({ setText, extract: clip });
+      getText({ text, setText, extract: clip, setPageText, page, pages });
     } catch (e) {
-      //empty to prvent console spam 
+      console.log(e);
     }
   };
   useEffect(() => {
@@ -60,7 +69,14 @@ function useManual({ connected, setText }) {
   }, [connected]);
 }
 
-function usePaginator({ text, textRef }) {
+function getPage(page, pages) {
+  if (!pages.get(page))
+    return 0;
+  return pages.get(page);
+}
+
+
+function usePaginator({ text, textRef, page, setPage, setPages }) {
   useEffect(() => {
     if (!textRef.current)
       return;
@@ -68,14 +84,14 @@ function usePaginator({ text, textRef }) {
     let sh = textRef.current.scrollHeight;
     let oh = textRef.current.offsetHeight;
 
-    console.log(sh);
-    console.log(oh);
+    // console.log(sh);
+    // console.log(oh);
 
     if (sh > oh) {
-      console.log("hey");
-      textRef.current.scrollBy({
-        top: 1000
+      setPages(prev => {
+        return new Map(prev).set(page, text.lineIds.length);
       });
+      setPage(prev => prev + 1);
     }
   }, [text, textRef]);
 }
@@ -104,31 +120,37 @@ function SaveButton() {
 
 
 function Texthooker() {
-  //change to array later; we will define page size with indices
+  //50 lines per page at most because of container height / line width. 
   const [connected, setConnected] = useState(true);
+  const [page, setPage] = useState(0);
+
+  //page index : page size - size is changed by the paginator and set by the useTextractor/Manual functions. 
+  const [pages, setPages] = useState(new Map());
+  const [pageText, setPageText] = useState([]);
+
   const [text, setText] = useState({
     lineIds: [],
     lines: {},
-    pageLimit: 50,
-    page: 0
   });
+
   const textRef = useRef(null);
 
-  useTextractor({ setText, setConnected });
-  useManual({ connected, setText });
-  usePaginator({ text, textRef })
+  useTextractor({ text, setText, setConnected, setPageText, page, pages });
+  useManual({ text, connected, setText, setPageText, page, pages });
+  usePaginator({ text, textRef, page, setPage, setPages })
 
-  const pageText = text.lineIds.slice(text.page * text.pageLimit, text.page * text.pageLimit + text.pageLimit);
-
+  //change to state
   //keep text-sm - line-height needs to divide 1000 perfectly.
   return (
     <>
       <div className="flex justify-center">
-        <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-sm overflow-hidden">
+        <div>{page}</div>
+        <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-sm">
           {pageText.map(ids => (
             <div key={ids}>{text.lines[ids].text}</div>
           ))}
         </div>
+        <div>{text.lineIds.length}</div>
       </div>
       <DropDownMenu />
     </>
