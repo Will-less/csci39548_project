@@ -1,12 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 
 //need Textractor and Textractor websocket to use
 const URL = "ws://localhost:6677";
 
-//pageLines should be dependent on the container size of the main div
+//>50 guarantees that the page is filled if each extracted "line" does not wrap around and only takes up one line
+//there could be a smaller value, however
 const pageLines = 50;
 
-function getText({ text, setText, extract, setPageText, page, pages }) {
+function getText({ text, setText, extract, page, pages }) {
   const id = crypto.randomUUID();
 
   setText(prev => {
@@ -14,21 +15,17 @@ function getText({ text, setText, extract, setPageText, page, pages }) {
     const newLines = { ...prev.lines, [id]: { text: extract } };
     const currentLine = prev.currLine + 1;
 
-    setPageText(() => {
-      return newLineIds.slice(getPage(page, pages), getPage(page, pages) + pageLines);
-    });
-
     return {
       lineIds: newLineIds,
       lines: newLines,
       currLine: currentLine,
     };
+
   });
-
-
 }
 
-function useTextractor({ text, setText, setConnected, setPageText, page, pages }) {
+
+function useTextractor({ text, setText, setConnected, page, pages }) {
   useEffect(() => {
     const socket = new WebSocket(URL);
 
@@ -38,8 +35,13 @@ function useTextractor({ text, setText, setConnected, setPageText, page, pages }
 
     socket.onmessage = (e) => {
       let exText = e.data;
-      getText({ text: text, setText, extract: exText, setPageText, page, pages });
+      try {
+        getText({ text: text, setText, extract: exText, page, pages });
+      } catch (e) {
+        console.log(e);
+      }
     }
+
 
     socket.onerror = () => {
       console.log("starting manual mode");
@@ -47,17 +49,18 @@ function useTextractor({ text, setText, setConnected, setPageText, page, pages }
     }
 
     return () => {
+      setConnected(false);
       socket.close();
     }
 
   }, []);
 }
 
-function useManual({ text, connected, setText, setPageText, page, pages }) {
+function useManual({ text, connected, setText, page, pages }) {
   const updateText = async () => {
     try {
       let clip = await navigator.clipboard.readText();
-      getText({ text, setText, extract: clip, setPageText, page, pages });
+      getText({ text, setText, extract: clip, page, pages });
     } catch (e) {
       console.log(e);
     }
@@ -73,35 +76,30 @@ function useManual({ text, connected, setText, setPageText, page, pages }) {
   }, [connected]);
 }
 
-function getPage(page, pages) {
-  if (!pages.get(page))
-    return 0;
-  return pages.get(page);
-}
 
 
-function usePaginator({ text, textRef, page, setPage, setPages }) {
-  useEffect(() => {
+
+function usePaginator({ text, setText, textRef, page, setPage, pages, setPages }) {
+  useLayoutEffect(() => {
     if (!textRef.current)
       return;
 
-    let sh = textRef.current.scrollHeight;
-    let oh = textRef.current.offsetHeight;
+    const sh = textRef.current.scrollHeight;
+    const oh = textRef.current.offsetHeight;
 
-    // console.log(sh);
-    // console.log(oh);
+    console.log(sh);
+    console.log(oh);
 
     if (sh > oh) {
-      setPages(prev => {
-        return new Map(prev).set(page, text.lineIds.length);
-      });
-      setPage(prev => prev + 1);
+      const newPage = page + 1;
+      setPage(newPage);
+      setPages(prev => new Map(prev).set(newPage, text.currLine));
     }
   }, [text, textRef]);
 }
 
 
-//add css later
+//TODO: add css, custom css text box, and additional options for user customization (to be decided later)
 function DropDownMenu() {
   return (
     <>
@@ -113,7 +111,7 @@ function DropDownMenu() {
 }
 
 
-//add custom hook to check if it's online
+//TODO:  add custom hook to check if the user is online and hide this button if user is not logged in
 function SaveButton() {
   return (
     <>
@@ -124,13 +122,15 @@ function SaveButton() {
 
 
 function Texthooker() {
+  //for Textractor connection 
   const [connected, setConnected] = useState(true);
   const [page, setPage] = useState(0);
 
-  //page index : line offset - offset is changed by the paginator and set by the useTextractor/Manual functions. 
-  const [pages, setPages] = useState(new Map());
-  const [pageText, setPageText] = useState([]);
+  //page index : line offset - offset is changed by the paginator 
+  const [pages, setPages] = useState(new Map([[0, 0]]));
+  //separate array containing the text of the page specifically 
 
+  //lines contains every extracted line of text 
   const [text, setText] = useState({
     lineIds: [],
     lines: {},
@@ -139,13 +139,16 @@ function Texthooker() {
 
   const textRef = useRef(null);
 
-  useTextractor({ text, setText, setConnected, setPageText, page, pages });
-  useManual({ text, connected, setText, setPageText, page, pages });
-  usePaginator({ text, textRef, page, setPage, setPages })
+  useTextractor({ text, setText, setConnected, page, pages });
+  useManual({ text, connected, setText, page, pages });
+  usePaginator({ text, setText, textRef, page, setPage, pages, setPages })
 
-  //change to variable later? 
-  //keep text-sm - line-height needs to divide 1000 perfectly.
-  //change button ids later to their own thing 
+  console.log(pages);
+
+  const pageStart = pages.get(page);
+  const pageText = text.lineIds.slice(pageStart, pageStart + pageLines);
+
+  // change button ids later to their own thing 
   return (
     <>
       <div className="flex justify-center ">
@@ -154,7 +157,7 @@ function Texthooker() {
           <div>total lines: {text.lineIds.length}</div>
           currentLine: {text.currLine}
         </div>
-        <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-sm">
+        <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-2x1">
           {pageText.map(ids => (
             <div key={ids}>{text.lines[ids].text}</div>
           ))}
