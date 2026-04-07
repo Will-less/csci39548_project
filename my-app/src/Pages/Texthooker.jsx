@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 
 //need Textractor and Textractor websocket to use
 const URL = "ws://localhost:6677";
+
+//pageLines should be dependent on the container size of the main div
 const pageLines = 50;
 
 function getText({ text, setText, extract, setPageText, page, pages }) {
@@ -10,6 +12,7 @@ function getText({ text, setText, extract, setPageText, page, pages }) {
   setText(prev => {
     const newLineIds = [...prev.lineIds, id];
     const newLines = { ...prev.lines, [id]: { text: extract } };
+    const currentLine = prev.currLine + 1;
 
     setPageText(() => {
       return newLineIds.slice(getPage(page, pages), getPage(page, pages) + pageLines);
@@ -18,6 +21,7 @@ function getText({ text, setText, extract, setPageText, page, pages }) {
     return {
       lineIds: newLineIds,
       lines: newLines,
+      currLine: currentLine,
     };
   });
 
@@ -120,17 +124,17 @@ function SaveButton() {
 
 
 function Texthooker() {
-  //50 lines per page at most because of container height / line width. 
   const [connected, setConnected] = useState(true);
   const [page, setPage] = useState(0);
 
-  //page index : page size - size is changed by the paginator and set by the useTextractor/Manual functions. 
+  //page index : line offset - offset is changed by the paginator and set by the useTextractor/Manual functions. 
   const [pages, setPages] = useState(new Map());
   const [pageText, setPageText] = useState([]);
 
   const [text, setText] = useState({
     lineIds: [],
     lines: {},
+    currLine: 0,
   });
 
   const textRef = useRef(null);
@@ -139,18 +143,27 @@ function Texthooker() {
   useManual({ text, connected, setText, setPageText, page, pages });
   usePaginator({ text, textRef, page, setPage, setPages })
 
-  //change to state
+  //change to variable later? 
   //keep text-sm - line-height needs to divide 1000 perfectly.
+  //change button ids later to their own thing 
   return (
     <>
-      <div className="flex justify-center">
-        <div>{page}</div>
+      <div className="flex justify-center ">
+        <div className="flex-1">
+          current page: {page}
+          <div>total lines: {text.lineIds.length}</div>
+          currentLine: {text.currLine}
+        </div>
         <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-sm">
           {pageText.map(ids => (
             <div key={ids}>{text.lines[ids].text}</div>
           ))}
         </div>
-        <div>{text.lineIds.length}</div>
+        <div className="flex-1">
+          {pageText.map(ids => (
+            <div key={ids}><button>{ids}</button></div>
+          ))}
+        </div>
       </div>
       <DropDownMenu />
     </>
