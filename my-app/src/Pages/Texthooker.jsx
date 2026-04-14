@@ -7,7 +7,7 @@ const URL = "ws://localhost:6677";
 //there could be a smaller value, however
 const pageLines = 50;
 
-function getText({ text, setText, extract, page, pages }) {
+function getText({ setText, extract }) {
   const id = crypto.randomUUID();
 
   setText(prev => {
@@ -36,7 +36,7 @@ function useTextractor({ text, setText, setConnected, page, pages }) {
     socket.onmessage = (e) => {
       let exText = e.data;
       try {
-        getText({ text: text, setText, extract: exText, page, pages });
+        getText({ setText, extract: exText });
       } catch (e) {
         console.log(e);
       }
@@ -60,7 +60,7 @@ function useManual({ text, connected, setText, page, pages }) {
   const updateText = async () => {
     try {
       let clip = await navigator.clipboard.readText();
-      getText({ text, setText, extract: clip, page, pages });
+      getText({ setText, extract: clip, });
     } catch (e) {
       console.log(e);
     }
@@ -77,9 +77,10 @@ function useManual({ text, connected, setText, page, pages }) {
 }
 
 
+//TODO: add boolean to sh > oh check to prevent progressing the page when loading a page - and add ids to pages
 
 
-function usePaginator({ text, setText, textRef, page, setPage, pages, setPages }) {
+function usePaginator({ text, textRef, page, setPage, setPages }) {
   useLayoutEffect(() => {
     if (!textRef.current)
       return;
@@ -127,7 +128,7 @@ function Texthooker() {
   const [page, setPage] = useState(0);
 
   //page index : line offset - offset is changed by the paginator 
-  const [pages, setPages] = useState(new Map([[0, 0]]));
+  const [pages, setPages] = useState(new Map([[1, 0]]));
   //separate array containing the text of the page specifically 
 
   //lines contains every extracted line of text 
@@ -141,14 +142,16 @@ function Texthooker() {
 
   useTextractor({ text, setText, setConnected, page, pages });
   useManual({ text, connected, setText, page, pages });
-  usePaginator({ text, setText, textRef, page, setPage, pages, setPages })
+  usePaginator({ text, textRef, page, setPage, setPages })
 
   console.log(pages);
 
   const pageStart = pages.get(page);
+
+  //contains text of a page that is a slice of all the text 
   const pageText = text.lineIds.slice(pageStart, pageStart + pageLines);
 
-  // change button ids later to their own thing 
+  //add page ids
   return (
     <>
       <div className="flex justify-center ">
@@ -163,8 +166,8 @@ function Texthooker() {
           ))}
         </div>
         <div className="flex-1">
-          {pageText.map(ids => (
-            <div key={ids}><button>{ids}</button></div>
+          {Array.from(pages).map(([page, offset]) => (
+            <div key={page}><button>{page} - {offset}</button></div>
           ))}
         </div>
       </div>
