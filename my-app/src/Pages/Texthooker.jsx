@@ -172,7 +172,7 @@ function Texthooker() {
         </div>
         <div className="flex-1">
           {Array.from(pages).map(([page, offset]) => (
-            <div key={page.id}><button>{page.num + 1} - {offset}</button></div>
+            <div key={page.id}><button>{page.id} | {page.num + 1} - {offset}</button></div>
           ))}
         </div>
       </div>
