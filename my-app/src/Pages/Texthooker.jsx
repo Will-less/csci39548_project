@@ -162,7 +162,7 @@ function Texthooker() {
 
   //contains text of a page that is a slice of all the text 
   let pageText;
-  if (pageNum < pages.size || pages.size < 2)
+  if (pageNum == pages.size)
     pageText = text.lineIds.slice(pageStart, pageStart + pageLines);
   else
     pageText = text.lineIds.slice(pageStart, pageStart + pages.get(pageNum + 1).offset);
