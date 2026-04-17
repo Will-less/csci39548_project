@@ -80,7 +80,7 @@ function useManual({ text, connected, setText, page, pages }) {
 //TODO: add boolean to sh > oh check to prevent progressing the page when loading a page - and add ids to pages
 
 
-function usePaginator({ text, textRef, pageNum, setPageNum, setPage, setPages }) {
+function usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages }) {
   useLayoutEffect(() => {
     if (!textRef.current)
       return;
@@ -91,7 +91,7 @@ function usePaginator({ text, textRef, pageNum, setPageNum, setPage, setPages })
     console.log(sh);
     console.log(oh);
 
-    if (sh > oh) {
+    if (pageNum === pages.size && sh > oh) {
       const newNum = text.currLine;
       const newPageNum = pageNum + 1;
       const newPage = { id: crypto.randomUUID(), offset: newNum };
@@ -150,10 +150,12 @@ function Texthooker() {
 
   useTextractor({ text, setText, setConnected, page, pages });
   useManual({ text, connected, setText, page, pages });
-  usePaginator({ text, textRef, pageNum, setPageNum, setPage, setPages })
+  usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
 
+
+  //TODO: set page and turn boolean controlling auto page progression in the paginator off (needs to be added in paginator as well)
   function goToPage(pageNumber) {
-    console.log(pageNumber);
+    setPageNum(pageNumber);
   }
 
 
@@ -168,7 +170,6 @@ function Texthooker() {
     pageText = text.lineIds.slice(pageStart, pageStart + pages.get(pageNum + 1).offset);
 
 
-  //TODO: add page ids
   return (
     <>
       <div className="flex justify-center ">
