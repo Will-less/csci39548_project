@@ -93,8 +93,8 @@ function usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setP
 
     if (pageNum === pages.size && sh > oh) {
       const newNum = text.currLine;
-      const newPageNum = pageNum + 1;
       const newPage = { id: crypto.randomUUID(), offset: newNum };
+      const newPageNum = pageNum + 1;
       setPageNum(newPageNum);
       setPage(newPage);
       setPages(prev => new Map(prev).set(newPageNum, newPage));
@@ -153,9 +153,25 @@ function Texthooker() {
   usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
 
 
-  //TODO: set page and turn boolean controlling auto page progression in the paginator off (needs to be added in paginator as well)
   function goToPage(pageNumber) {
     setPageNum(pageNumber);
+  }
+
+  //TODO: make compatible with paginator
+  function deline(id) {
+    setText(prev => {
+      const newLineIds = prev.lineIds.filter(lineIDs => lineIDs != id);
+      const { [id]: deleted, ...filtered } = prev.lines;
+      const newLines = filtered;
+      const currentLine = prev.currLine - 1;
+
+      return {
+        lineIds: newLineIds,
+        lines: newLines,
+        currLine: currentLine,
+      };
+    }
+    );
   }
 
 
@@ -179,8 +195,8 @@ function Texthooker() {
           currentLine: {text.currLine}
         </div>
         <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-2x1">
-          {pageText.map(ids => (
-            <div key={ids}>{text.lines[ids].text}</div>
+          {pageText.map((ids,) => (
+            <div key={ids}>{text.lines[ids].text} <button className="hover:font-bold" onClick={() => deline(ids)}>X</button></div>
           ))}
         </div>
         <div className="flex-1">
