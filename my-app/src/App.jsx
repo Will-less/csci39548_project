@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import NavBar from "./Components/Navbar";
 import Home from './Pages/Home';
@@ -10,8 +11,11 @@ import Nil from './Components/Nil';
 import Footer from "./Components/Footer";
 
 
-
 function App() {
+
+  const location = useLocation();
+  const excludeFooter = "/Texthooker";
+
   return (
     <>
       <NavBar />
@@ -22,7 +26,7 @@ function App() {
         <Route path="/Texthooker" element={<Texthooker />} />
         <Route path="*" element={<Nil />} />
       </Routes>
-      <Footer />
+      {location.pathname !== excludeFooter && <Footer />}
     </>
   )
 }

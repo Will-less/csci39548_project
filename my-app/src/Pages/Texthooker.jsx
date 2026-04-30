@@ -182,7 +182,7 @@ function Texthooker() {
   if ((pageNum + 1) === pages.length) {
     pageText = text.lineIds.slice(pageStart, pageStart + pageLines);
   } else {
-    pageText = text.lineIds.slice(pageStart, pageStart + pages[pageNum].offset);
+    pageText = text.lineIds.slice(pageStart, pageStart + pages[pageNum + 1].offset);
   }
 
   return (
