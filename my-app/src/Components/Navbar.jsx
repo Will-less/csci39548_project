@@ -5,21 +5,17 @@ const Navbar = () => {
 
   //needs context to deal with changes from user log in
   return (
-    <nav>
-      <ul className="flex space-x-4 content-between">
-        <li>
-          <NavLink to="/">Home</NavLink>
-        </li>
-        <li>
-          <NavLink to="/Texthooker">Texthooker</NavLink>
-        </li>
-        <li>
-          <NavLink to="/Login">Login</NavLink>
-        </li>
-        <li>
-          <NavLink to="Library">Library</NavLink>
-        </li>
-      </ul>
+    <nav className="bg-[#0f172a] text-white py-6 px-8">
+      <div className="flex justify-between items-center max-w-6xl mx-auto text-sm">
+        <p className="text-3xl font-semibold">Texthooker</p>
+
+        <ul className="flex gap-6">
+            <NavLink to="/">Home</NavLink>
+            <NavLink to="Library">Library</NavLink>
+            <NavLink to="/Texthooker">Texthooker</NavLink>
+            <NavLink to="/Login">Login</NavLink>
+        </ul>
+      </div>
     </nav>
   );
 };
