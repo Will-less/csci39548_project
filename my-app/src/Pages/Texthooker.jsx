@@ -91,13 +91,13 @@ function usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setP
     console.log(sh);
     console.log(oh);
 
-    if (pageNum === pages.size && sh > oh) {
+    if ((pageNum + 1) === pages.length && sh > oh) {
       const newNum = text.currLine;
       const newPage = { id: crypto.randomUUID(), offset: newNum };
       const newPageNum = pageNum + 1;
       setPageNum(newPageNum);
       setPage(newPage);
-      setPages(prev => new Map(prev).set(newPageNum, newPage));
+      setPages(prev => [...prev, newPage]);
     }
   }, [text, textRef]);
 }
@@ -133,10 +133,10 @@ function Texthooker() {
     id: crypto.randomUUID(),
     offset: 0,
   }));
-  const [pageNum, setPageNum] = useState(1);
+  const [pageNum, setPageNum] = useState(0);
 
   //page : line offset - offset is changed by the paginator 
-  const [pages, setPages] = useState(new Map([[1, page]]));
+  const [pages, setPages] = useState([page]);
   //separate array containing the text of the page specifically 
 
   //lines contains every extracted line of text 
@@ -175,33 +175,35 @@ function Texthooker() {
   }
 
 
-  console.log(pages);
-  const pageStart = pages.get(pageNum).offset;
+  const pageStart = pages[pageNum].offset;
 
   //contains text of a page that is a slice of all the text 
   let pageText;
-  if (pageNum == pages.size)
+  if ((pageNum + 1) === pages.length) {
     pageText = text.lineIds.slice(pageStart, pageStart + pageLines);
-  else
-    pageText = text.lineIds.slice(pageStart, pageStart + pages.get(pageNum + 1).offset);
-
+  } else {
+    pageText = text.lineIds.slice(pageStart, pageStart + pages[pageNum].offset);
+  }
 
   return (
     <>
       <div className="flex justify-center ">
         <div className="flex-1">
-          current page: {pageNum}
+          current page: {pageNum + 1}
           <div>total lines: {text.lineIds.length}</div>
           currentLine: {text.currLine}
         </div>
         <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-2x1">
-          {pageText.map((ids,) => (
-            <div key={ids}>{text.lines[ids].text} <button className="hover:font-bold" onClick={() => deline(ids)}>X</button></div>
+          {pageText.map((ids) => (
+            <div className="flex gap-2 items-center" key={ids}>
+              <div>{text.lines[ids].text}</div>
+              <button className="hover:font-bold" onClick={() => deline(ids)}>X</button>
+            </div>
           ))}
         </div>
         <div className="flex-1">
-          {Array.from(pages).map(([pageNumber, page]) => (
-            <div key={page.id}><button onClick={() => goToPage(pageNumber)}>{page.id} | {pageNumber} - {page.offset}</button></div>
+          {pages.map((page, index) => (
+            <div key={page.id}><button onClick={() => goToPage(index)}>{page.id} | {index + 1} - {page.offset}</button></div>
           ))}
         </div>
       </div>
