@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
+// useLocation used to recieve data passed from the Library page
+import { useLocation } from "react-router-dom"
+
 
 //need Textractor and Textractor websocket to use
 const URL = "ws://localhost:6677";
@@ -126,6 +129,15 @@ function SaveButton() {
 
 
 function Texthooker() {
+  // get file data passed form library page(selected file)
+  const location = useLocation()
+  const file = location.state
+
+  //get file content(if exists)
+  const fileContent = file?.content || ""
+  //temp editable content for opened file
+  const [editableContent, setEditableContent] = useState(fileContent)
+  const [saveMessage, setSaveMessage] = useState("")
   //for Textractor connection 
   const [connected, setConnected] = useState(true);
   //TODO: convert pages to json object - add to pages map 
@@ -146,11 +158,16 @@ function Texthooker() {
     currLine: 0,
   });
 
+
   const textRef = useRef(null);
 
   useTextractor({ text, setText, setConnected, page, pages });
   useManual({ text, connected, setText, page, pages });
   usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
+
+  function handleSaveChanges(){
+    setSaveMessage("Saved changes for this file!")
+  }
 
 
   function goToPage(pageNumber) {
@@ -187,6 +204,36 @@ function Texthooker() {
 
   return (
     <>
+      {/* display currently opened file (passed from library) */}
+      {/* allows texthooker page to know which file the user selected */}
+
+      {file &&(
+        <div className="text-white text-center mt-6 mb-6">
+          <h2 className="text-2xl font-semibold">Opened File:</h2>
+          <p className="text-lg mt-2">{file.title}</p>
+          
+          <textarea
+            value={editableContent}
+            onChange={(e) => setEditableContent(e.target.value)}
+            className="mt-4 w-[600px] min-h-[160px] bg-[#111c33] border border-[#3f5f91] rounded p-4 text-white"
+            placeholder="Start typing or editing text here..."
+          />
+
+          <div className="mt-4">
+            <button
+              onClick={handleSaveChanges}
+              className="bg-purple-700 hover:bg-purple-800 px-6 py-3 rounded text-white"
+            >
+              Save changes
+            </button>
+            {saveMessage && (
+              <p className="text-green-400 mt-3">
+                {saveMessage}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
       <div className="flex justify-center ">
         <div className="flex-1">
           current page: {pageNum + 1}
