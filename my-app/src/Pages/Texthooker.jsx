@@ -135,9 +135,7 @@ function Texthooker() {
 
   //get file content(if exists)
   const fileContent = file?.content || ""
-  //temp editable content for opened file
-  const [editableContent, setEditableContent] = useState(fileContent)
-  const [saveMessage, setSaveMessage] = useState("")
+ 
   //for Textractor connection 
   const [connected, setConnected] = useState(true);
   //TODO: convert pages to json object - add to pages map 
@@ -164,10 +162,6 @@ function Texthooker() {
   useTextractor({ text, setText, setConnected, page, pages });
   useManual({ text, connected, setText, page, pages });
   usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
-
-  function handleSaveChanges(){
-    setSaveMessage("Saved changes for this file!")
-  }
 
 
   function goToPage(pageNumber) {
@@ -210,28 +204,12 @@ function Texthooker() {
       {file &&(
         <div className="text-white text-center mt-6 mb-6">
           <h2 className="text-2xl font-semibold">Opened File:</h2>
-          <p className="text-lg mt-2">{file.title}</p>
-          
-          <textarea
-            value={editableContent}
-            onChange={(e) => setEditableContent(e.target.value)}
-            className="mt-4 w-[600px] min-h-[160px] bg-[#111c33] border border-[#3f5f91] rounded p-4 text-white"
-            placeholder="Start typing or editing text here..."
-          />
 
-          <div className="mt-4">
-            <button
-              onClick={handleSaveChanges}
-              className="bg-purple-700 hover:bg-purple-800 px-6 py-3 rounded text-white"
-            >
-              Save changes
-            </button>
-            {saveMessage && (
-              <p className="text-green-400 mt-3">
-                {saveMessage}
-              </p>
-            )}
-          </div>
+          <p className="text-lg mt-2">{file.title}</p>
+
+          <p className="text-gray-300 mt-2">
+            Category: {file.category}
+          </p>
         </div>
       )}
       <div className="flex justify-center ">
