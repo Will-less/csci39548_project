@@ -135,7 +135,7 @@ function Texthooker() {
 
   //get file content(if exists)
   const fileContent = file?.content || ""
- 
+
   //for Textractor connection 
   const [connected, setConnected] = useState(true);
   //TODO: convert pages to json object - add to pages map 
@@ -170,19 +170,20 @@ function Texthooker() {
 
   //TODO: make compatible with paginator
   function deline(id) {
-    setText(prev => {
-      const newLineIds = prev.lineIds.filter(lineIDs => lineIDs != id);
-      const { [id]: deleted, ...filtered } = prev.lines;
-      const newLines = filtered;
-      const currentLine = prev.currLine - 1;
+    const newLineIds = text.lineIds.filter(lineID => lineID != id);
+    const { [id]: deleted, ...filtered } = text.lines;
+    const currentLine = text.currLine - 1;
 
-      return {
-        lineIds: newLineIds,
-        lines: newLines,
-        currLine: currentLine,
-      };
+    setText({
+      lineIds: newLineIds,
+      lines: filtered,
+      currLine: currentLine,
+    });
+
+    if (pages.length > 1 && newLineIds.length < pages[pages.length - 1].offset) {
+      const newPages = pages.slice(0, -1);
+      setPages(newPages);
     }
-    );
   }
 
 
@@ -193,15 +194,17 @@ function Texthooker() {
   if ((pageNum + 1) === pages.length) {
     pageText = text.lineIds.slice(pageStart, pageStart + pageLines);
   } else {
-    pageText = text.lineIds.slice(pageStart, pageStart + pages[pageNum + 1].offset);
+    pageText = text.lineIds.slice(pageStart, pageStart + pages[pageNum + 1].offset - pages[pageNum].offset);
   }
 
+  console.log(text.lineIds.length);
+  console.log(pages[pages.length - 1].offset);
   return (
     <>
       {/* display currently opened file (passed from library) */}
       {/* allows texthooker page to know which file the user selected */}
 
-      {file &&(
+      {file && (
         <div className="text-white text-center mt-6 mb-6">
           <h2 className="text-2xl font-semibold">Opened File:</h2>
 
