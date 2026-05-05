@@ -197,8 +197,6 @@ function Texthooker() {
     pageText = text.lineIds.slice(pageStart, pageStart + pages[pageNum + 1].offset - pages[pageNum].offset);
   }
 
-  console.log(text.lineIds.length);
-  console.log(pages[pages.length - 1].offset);
   return (
     <>
       {/* display currently opened file (passed from library) */}
