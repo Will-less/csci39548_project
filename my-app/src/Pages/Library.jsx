@@ -1,10 +1,12 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 function Library() {
 
   //dummy data
-  const [savedFiles, setSavedFiles] = useState([
+  const [savedFiles, setSavedFiles] = useState(() => {
+    const saved = localStorage.getItem("files")
+    return saved ? JSON.parse(saved) : [
     {
       id:1,
       title: "Japanese Game Notes",
@@ -29,10 +31,19 @@ function Library() {
       linecount: 23,
       lastUpdated: "Apr 10, 2026",
     },
-  ])
+  ]
+})
 
   //tracks selected file and search/filter inputs
   const [selectedFile, setSelectedFile] = useState(null)
+
+  //tracks if selected file details are being edited
+  const [isEditing, setIsEditing] = useState(false)
+
+  //stores temp title/category edits before saving
+  const[editedTitle, setEditedTitle] = useState("")
+  const[editedCategory, setEditedCategory] = useState("")
+
   const[searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
 
@@ -46,7 +57,10 @@ function Library() {
     "Reading",
   ]
   //custom categories that can be added/removed
-  const [customCategories, setCustomCategories] = useState([])
+  const [customCategories, setCustomCategories] = useState(() => {
+    const savedCategories = localStorage.getItem("customCategories")
+    return savedCategories ? JSON.parse(savedCategories) : []
+  })
   const categories = [...defaultCategories, ...customCategories]
   const[newCategory, setNewCategory] = useState("")
 
@@ -104,10 +118,54 @@ function handleRemoveCategory(categoryToRemove) {
     customCategories.filter((category) => category !== categoryToRemove)
   )
 
-  if (selectedCategory == categoryToRemove){
+  if (selectedCategory === categoryToRemove){
     setSelectedCategory("All")
   }
 }
+
+//delete saved file from library
+function handleDeleteFile(fileId) {
+  const updateFiles = savedFiles.filter((file) => file.id !== fileId)
+
+  setSavedFiles(updateFiles)
+  setSelectedFile(null)
+}
+
+//saves updated title/ category for selected title
+function handleSaveFileEdits() {
+  const updatedFiles = savedFiles.map((file) => {
+    if (file.id === selectedFile.id) {
+      return {
+        ...file,
+        title: editedTitle,
+        category: editedCategory,
+        lastUpdated: new Date().toLocaleDateString(),
+      }
+    }
+
+    return file
+  })
+
+  setSavedFiles(updatedFiles)
+
+  const updatedSelectedFile = updatedFiles.find(
+    (file) => file.id === selectedFile.id
+  )
+
+  setSelectedFile(updatedSelectedFile)
+  setIsEditing(false)
+}
+
+
+//saves files to browser storage whenever they change
+useEffect(() => {
+  localStorage.setItem("files", JSON.stringify(savedFiles))
+}, [savedFiles])
+
+//saves custom categories 
+useEffect(() => {
+  localStorage.setItem("customCategories", JSON.stringify(customCategories))
+}, [customCategories])
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white">
@@ -116,7 +174,7 @@ function handleRemoveCategory(categoryToRemove) {
           Library
         </h1>
 
-        <p className="text-center text-gray-300 text-lg mg-12">
+        <p className="text-center text-gray-300 text-lg mb-12">
           View and open text pages saved from Texthooker.
         </p>
 
@@ -198,6 +256,110 @@ function handleRemoveCategory(categoryToRemove) {
           )}
 
         </div>
+        
+        {/* Preview panel for selected file */}
+        {selectedFile && (
+          <div className="max-w-xl mx-auto mb-12 bg-[#111c33] border border-[#3f5f91] rounded-lg p-6 shadow-lg text-center">
+            {/* allows editing selected file title/category */}
+            {isEditing ? (
+              <div className="flex flex-col gap-4 mb-4">
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="px-4 py-3 rounded bg-[#0f172a] border border-[#3f5f91] text-white"
+              />
+
+              <select 
+                value={editedCategory}
+                onChange={(e) => setEditedCategory(e.target.value)}
+                className="px-4 py-3 rounded bg-[#0f172a] border border-[#3f5f91] text-white"
+                >
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-2xl font-semibold mb-2">
+                  {selectedFile.title}
+                </h3>
+
+                <p className="text-gray-300 mb-4">
+                  Category: {selectedFile.category}
+                </p>
+
+                <p className="text-gray-400 mb-4">
+                  {selectedFile.linecount} lines saved • Updated {selectedFile.lastUpdated}
+                </p>
+              </>
+            )}
+
+            <div className="flex flex-wrap justify-center gap-4">
+
+            {/* toggles edditing for selcted file details */}
+            {isEditing ? (
+              <>
+                <button
+                  onClick={handleSaveFileEdits}
+                  className="bg-green-700 hover:bg-green-800 px-6 py-3 rounded text-white"
+                >
+                  Save edits
+                </button>
+
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="bg-gray-700 hover:bg-gray-800 px-6 py-3 rounded text-white"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+              onClick={() => setIsEditing(true)}
+              className="bg-blue-700 hover:bg-blue-800 px-6 py-3 rounded text-white"
+              >
+                Edit details
+              </button>
+            )}
+              <button
+                onClick={() => navigate("/Texthooker", {state: selectedFile })}
+                  className="bg-purple-700 hover:bg-purple-800 px-6 py-3 rounded text-white "
+                >
+                  Open file
+                </button>
+
+                <button
+                  onClick={() => {
+                    const confirmDelete = window.confirm(
+                      `Are you sure you want to delete "${selectedFile.title}"?`
+                    )
+
+                    if (confirmDelete) {
+                      handleDeleteFile(selectedFile.id)
+                    }
+                  }}
+                  className="bg-red-700 hover:bg-red-800 px-6 py-3 rounded text-white"
+                >
+                  Delete file
+                </button>
+
+                {/* closes slected file preview */}
+                <button
+                onClick={() => {
+                  setSelectedFile(null)
+                  setIsEditing(false)
+                }}
+                className="bg-gray-700 hover:bg-gray-800 px-6 py-3 rounded text-white"
+                >
+                  Close
+                </button>
+            </div>
+          </div>
+        )}
 
         {/* Message when no files match search/filter */}
         {filteredFiles.length === 0 && (
@@ -215,8 +377,13 @@ function handleRemoveCategory(categoryToRemove) {
          {filteredFiles.map((file) => (
           <div
            key={file.id}
-           onClick={() => setSelectedFile(file)}
-           className="w-full min-h-[140] bg-[#334a70] border border-[#3f5f91] rounded-lg flex flex-col items-center justify-center text-center hover:bg-[#3f5f91] hover:scale-105 transition duration-200 cursor-pointer p-6 shadow-lg"
+           onClick={() => {
+            setSelectedFile(file)
+            setEditedTitle(file.title)
+            setEditedCategory(file.category)
+            setIsEditing(false)
+           }}
+           className="w-full min-h-[140px] bg-[#334a70] border border-[#3f5f91] rounded-lg flex flex-col items-center justify-center text-center hover:bg-[#3f5f91] hover:scale-105 transition duration-200 cursor-pointer p-6 shadow-lg"
            >
            <p className="text-xl font-medium">{file.title}</p>
            <p className="text-sm text-gray-300 mt-1">{file.category}</p>
@@ -229,30 +396,6 @@ function handleRemoveCategory(categoryToRemove) {
           </div>
          ))}
         </div>
-        )}
-
-        {/* Preview panel for selected file */}
-        {selectedFile && (
-          <div className="max-w-xl mx-auto mt-12 bg-[#111c33] border border-[#3f5f91] rounded-lg p-6 shadow-lg text-center">
-            <h3 className="text-2xl font-semibold mb-2">
-              {selectedFile.title}
-            </h3>
-
-            <p className="text-gray-300 mb-4">
-              Category: {selectedFile.category}
-            </p>
-
-            <p className="text-gray-400 mb-4">
-              {selectedFile.linecount} lines saved • Updated {selectedFile.lastUpdated}
-            </p>
-
-            <button
-              onClick={() => navigate("/Texthooker", {state: selectedFile})} 
-              className="bg-purple-700 hover:bg-purple-800 px-6 py-3 rounded text-white"
-            >
-              Open file
-            </button>
-          </div>
         )}
 
       </main>

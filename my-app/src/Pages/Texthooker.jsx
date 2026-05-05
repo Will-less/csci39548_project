@@ -107,11 +107,12 @@ function usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setP
 
 
 //TODO: add css, custom css text box, and additional options for user customization (to be decided later)
-function DropDownMenu() {
+//dropdown menu containing save button
+function DropDownMenu({ onSave }) {
   return (
     <>
       <div className="fixed top-10 right-10 bg-mist-500">
-        <SaveButton />
+        <SaveButton onSave={onSave} />
       </div>
     </>
   )
@@ -119,10 +120,16 @@ function DropDownMenu() {
 
 
 //TODO:  add custom hook to check if the user is online and hide this button if user is not logged in
-function SaveButton() {
+//saves current texthooker text into library
+function SaveButton({ onSave }) {
   return (
     <>
-      <button className="text-white">SAVE</button>
+      <button
+        onClick={onSave}
+        className="text-white"
+        >
+          SAVE
+        </button>
     </>
   )
 }
@@ -159,13 +166,49 @@ function Texthooker() {
 
   const textRef = useRef(null);
 
+  //feedback after saving text to library
+  const [saveMessage, setSaveMessage] = useState("")
+
   useTextractor({ text, setText, setConnected, page, pages });
   useManual({ text, connected, setText, page, pages });
   usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
 
+  //saves all extracted lines as new library file
+  function handleSaveToLibrary(){
+    const savedText = text.lineIds
+    .map((id) => text.lines[id].text)
+    .join("\n")
+
+  const newSavedFile = {
+    id: Date.now(),
+    title: `Saved Text ${new Date().toLocaleString()}`,
+    category: "Uncategorized",
+    content: savedText,
+    linecount: text.lineIds.length,
+    lastUpdated: new Date().toLocaleString(),
+  }
+
+  const existingFiles = JSON.parse(localStorage.getItem("files")) || []
+
+  localStorage.setItem(
+    "files",
+    JSON.stringify([...existingFiles, newSavedFile])
+  )
+
+  setSaveMessage("Saved to Library!")
+  }
+
 
   function goToPage(pageNumber) {
     setPageNum(pageNumber);
+  }
+
+  //testing to test saving  without textractor
+  function handleAddTextLine() {
+    getText({
+      setText,
+      extract: "This is a text line from Texthooker.",
+    })
   }
 
   //TODO: make compatible with paginator
@@ -199,6 +242,12 @@ function Texthooker() {
 
   return (
     <>
+      {saveMessage && (
+        <p className="text-green-400 text-center mt-4">
+          {saveMessage}
+        </p>
+      )}
+
       {/* display currently opened file (passed from library) */}
       {/* allows texthooker page to know which file the user selected */}
 
@@ -218,6 +267,13 @@ function Texthooker() {
           current page: {pageNum + 1}
           <div>total lines: {text.lineIds.length}</div>
           currentLine: {text.currLine}
+          {/* Test line button */}
+          <button
+          onClick={handleAddTextLine}
+          className="mt-4 bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded text-white"
+          >
+            Add Text Line
+          </button>
         </div>
         <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-2x1">
           {pageText.map((ids) => (
@@ -233,7 +289,7 @@ function Texthooker() {
           ))}
         </div>
       </div>
-      <DropDownMenu />
+      <DropDownMenu onSave={handleSaveToLibrary} />
     </>
   )
 }
