@@ -119,7 +119,6 @@ function DropDownMenu({ onSave }) {
 }
 
 
-//TODO:  add custom hook to check if the user is online and hide this button if user is not logged in
 //saves current texthooker text into library
 function SaveButton({ onSave }) {
   return (
@@ -127,9 +126,9 @@ function SaveButton({ onSave }) {
       <button
         onClick={onSave}
         className="text-white"
-        >
-          SAVE
-        </button>
+      >
+        SAVE
+      </button>
     </>
   )
 }
@@ -138,10 +137,8 @@ function SaveButton({ onSave }) {
 function Texthooker() {
   // get file data passed form library page(selected file)
   const location = useLocation()
-  const file = location.state
+  const file = location.state;
 
-  //get file content(if exists)
-  const fileContent = file?.content || ""
 
   //for Textractor connection 
   const [connected, setConnected] = useState(true);
@@ -163,6 +160,14 @@ function Texthooker() {
     currLine: 0,
   });
 
+  useEffect(() => {
+    if (file) {
+      setText(file.content.text);
+      setPages(file.content.pages);
+
+    }
+  }, [file]);
+
 
   const textRef = useRef(null);
 
@@ -174,28 +179,29 @@ function Texthooker() {
   usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
 
   //saves all extracted lines as new library file
-  function handleSaveToLibrary(){
-    const savedText = text.lineIds
-    .map((id) => text.lines[id].text)
-    .join("\n")
+  function handleSaveToLibrary() {
+    const savedContent = {
+      pages: pages,
+      text: text,
+    };
 
-  const newSavedFile = {
-    id: Date.now(),
-    title: `Saved Text ${new Date().toLocaleString()}`,
-    category: "Uncategorized",
-    content: savedText,
-    linecount: text.lineIds.length,
-    lastUpdated: new Date().toLocaleString(),
-  }
+    const newSavedFile = {
+      id: Date.now(),
+      title: `Saved Text ${new Date().toLocaleString()}`,
+      category: "Uncategorized",
+      content: savedContent,
+      linecount: savedContent.text.lineIds.length,
+      lastUpdated: new Date().toLocaleString(),
+    }
 
-  const existingFiles = JSON.parse(localStorage.getItem("files")) || []
+    const existingFiles = JSON.parse(localStorage.getItem("files")) || []
 
-  localStorage.setItem(
-    "files",
-    JSON.stringify([...existingFiles, newSavedFile])
-  )
+    localStorage.setItem(
+      "files",
+      JSON.stringify([...existingFiles, newSavedFile])
+    )
 
-  setSaveMessage("Saved to Library!")
+    setSaveMessage("Saved to Library!")
   }
 
 
@@ -211,7 +217,6 @@ function Texthooker() {
     })
   }
 
-  //TODO: make compatible with paginator
   function deline(id) {
     const newLineIds = text.lineIds.filter(lineID => lineID != id);
     const { [id]: deleted, ...filtered } = text.lines;
@@ -248,29 +253,30 @@ function Texthooker() {
         </p>
       )}
 
-      {/* display currently opened file (passed from library) */}
-      {/* allows texthooker page to know which file the user selected */}
-
-      {file && (
-        <div className="text-white text-center mt-6 mb-6">
-          <h2 className="text-2xl font-semibold">Opened File:</h2>
-
-          <p className="text-lg mt-2">{file.title}</p>
-
-          <p className="text-gray-300 mt-2">
-            Category: {file.category}
-          </p>
-        </div>
-      )}
       <div className="flex justify-center ">
         <div className="flex-1">
           current page: {pageNum + 1}
           <div>total lines: {text.lineIds.length}</div>
           currentLine: {text.currLine}
+
+          {/* display currently opened file (passed from library) */}
+          {/* allows texthooker page to know which file the user selected */}
+          {file && (
+            <div className="text-gray-300 text-center mt-6 mb-6">
+              <h2 className="text-2xl font-semibold">Opened File:</h2>
+
+              <p className="text-lg mt-2">{file.title}</p>
+
+              <p className="text-gray-300 mt-2">
+                Category: {file.category}
+              </p>
+            </div>
+          )}
+
           {/* Test line button */}
           <button
-          onClick={handleAddTextLine}
-          className="mt-4 bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded text-white"
+            onClick={handleAddTextLine}
+            className="mt-4 bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded text-white"
           >
             Add Text Line
           </button>
