@@ -25,7 +25,7 @@ const textSchema = new mongoose.Schema({
   },
   pages: {
     type: [Schema.Types.ObjectId],
-    ref: Page
+    ref: 'Page'
   }
 
 })

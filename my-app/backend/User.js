@@ -10,9 +10,16 @@ const userSchema = new mongoose.Schema({
     match: [/^\S+@\S+\.\S+$/, '...']
   },
   password: {
+    //please don't just put the raw password
     type: String,
     required: [true, 'A password is required'],
+    minLength: 8,
     select: false
+  },
+  createdAt: {
+    type: Date,
+    immutable: true,
+    default: () => Date.now()
   },
   text: {
     type: Schema.Types.ObjectId,
