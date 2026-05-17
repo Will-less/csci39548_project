@@ -8,7 +8,7 @@ const pageSchema = new mongoose.Schema({
 
 const Page = mongoose.model("Page", pageSchema);
 
-const textSchema = new mongoose.Schema({
+export const textSchema = new mongoose.Schema({
   title: {
     type: String,
     default: 'Untitled Document'
@@ -30,5 +30,4 @@ const textSchema = new mongoose.Schema({
 
 })
 
-const Text = mongoose.model("Text", textSchema);
-export default Text;
+//const Text = mongoose.model("Text", textSchema);

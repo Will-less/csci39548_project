@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Text from './text.js';
+import { textSchema } from './text.js';
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -21,11 +21,8 @@ const userSchema = new mongoose.Schema({
     immutable: true,
     default: () => Date.now()
   },
-  text: {
-    type: Schema.Types.ObjectId,
-    ref: Text
-  }
-})
+  text: [textSchema]
+});
 
 const User = mongoose.model("User", userSchema);
 export default User;
