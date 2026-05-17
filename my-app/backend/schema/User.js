@@ -21,7 +21,10 @@ const userSchema = new mongoose.Schema({
     immutable: true,
     default: () => Date.now()
   },
-  text: [textSchema]
+  text: {
+    type: [textSchema],
+    default: []
+  }
 });
 
 const User = mongoose.model("User", userSchema);

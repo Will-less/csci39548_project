@@ -5,7 +5,7 @@ import cors from 'cors';
 import userRoutes from './routes/userRoutes.js'
 
 
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: './.env' });
 
 const app = express();
 app.use(cors());
