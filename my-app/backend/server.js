@@ -2,7 +2,6 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import Text from './schema/Text.js';
 
 
 dotenv.config({ path: './config.env' });
@@ -28,5 +27,3 @@ async function connectToCloud() {
 }
 
 connectToCloud();
-const text = await Text.create({ title: "Steins;Gate", content: "this is a test" });
-text.save().then(() => console.log("saved data"));
