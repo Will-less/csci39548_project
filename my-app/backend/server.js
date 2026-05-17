@@ -2,7 +2,8 @@ import express from "express";
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import Text from './Text.js';
+import Text from './schema/Text.js';
+
 
 dotenv.config({ path: './config.env' });
 
