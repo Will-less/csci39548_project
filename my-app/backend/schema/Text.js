@@ -30,4 +30,3 @@ export const textSchema = new mongoose.Schema({
 
 })
 
-//const Text = mongoose.model("Text", textSchema);

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { textSchema } from './text.js';
+import { textSchema } from './Text.js';
 
 const userSchema = new mongoose.Schema({
   email: {
