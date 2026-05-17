@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+
 import axios from 'axios';
+
+const usersUrl = new URL('users', import.meta.env.VITE_API_URL);
 
 function Signup() {
   const navbar = useNavigate();
@@ -12,6 +15,20 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+
+
+  //to get test working, add an .env file at /frontend/ with the localhost link with port 3000 and then /api/ 
+  useEffect(() => {
+    async function grabData() {
+      const response = await axios.get(`${usersUrl}/3`);
+      console.log(response);
+    }
+    console.log("all vite envs: ", import.meta.env);
+    console.log("vite_api_url: ", import.meta.env.VITE_API_URL);
+    console.log(`${usersUrl}/3`);
+    grabData();
+  }, []);
+
 
   function handleSubmit(e) {
     e.preventDefault();
