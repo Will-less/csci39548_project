@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 async function connectToCloud() {
   try {
-    //either create a db named library or remove {dbName: 'users'} when you are testing
+    //either create a db named users or remove {dbName: 'users'} when you are testing
     await mongoose.connect(process.env.MONGO_URI, { dbName: 'users' });
     console.log("successfully connected to MongoDB Atlas Cloud!");
     app.listen(PORT, () => {

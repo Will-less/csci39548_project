@@ -1,4 +1,5 @@
 import User from '../schema/User.js';
+import bcrypt from 'bcryptjs';
 
 //get
 export const getUser = async (req, res) => {
@@ -14,14 +15,18 @@ export const getUser = async (req, res) => {
   }
 };
 
-//create; post
+//register; post
 export const createUser = async (req, res) => {
   try {
     const { username, email, password, text } = req.body;
-    const newUser = await User.create({ username, email, password, text });
-    res.status(201).json({ status: "success", data: newUser });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPass = await bcrypt.hash(password, salt)
+
+    const newUser = await User.create({ username, email, password: hashPass, text });
+    res.status(201).json({ status: "user created" });
   } catch (error) {
-    res.status(400).json({ status: "fail", message: error.message })
+    res.status(400).json({ status: "failed to create user", message: error.message })
   }
 };
 
@@ -50,5 +55,19 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ status: "fail", message: error.message });
   }
 }
+
+/*
+//post
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email/password" });
+    }
+
+  } catch
+}
+*/
 
 //TODO: way of updating email/password

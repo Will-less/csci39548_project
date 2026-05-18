@@ -43,11 +43,10 @@ function Signup() {
       "Password:"
     );
     */
-    //TODO: SALT PASSWORDS AND HASH !!!!! 
     const newUser = { username: username, email: email, password: password };
     const putUser = async () => {
       try {
-        await axios.post(`${usersUrl}/`, newUser);
+        await axios.post(`${usersUrl}/register`, newUser);
         console.log('Success:', newUser);
       } catch (error) {
         console.error('Error: ', error);
