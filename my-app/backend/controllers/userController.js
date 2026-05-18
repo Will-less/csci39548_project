@@ -17,8 +17,8 @@ export const getUser = async (req, res) => {
 //create; post
 export const createUser = async (req, res) => {
   try {
-    const { email, password, text } = req.body;
-    const newUser = await User.create({ email, password, text });
+    const { username, email, password, text } = req.body;
+    const newUser = await User.create({ username, email, password, text });
     res.status(201).json({ status: "success", data: newUser });
   } catch (error) {
     res.status(400).json({ status: "fail", message: error.message })

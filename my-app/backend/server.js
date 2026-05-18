@@ -4,12 +4,10 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import userRoutes from './routes/userRoutes.js'
 
-
 const app = express();
 app.use(cors());
-
-dotenv.config({ path: './.env' });
 app.use(express.json())
+dotenv.config({ path: './.env' });
 app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 3000;

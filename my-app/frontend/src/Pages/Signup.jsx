@@ -20,12 +20,12 @@ function Signup() {
   //to get test working, add an .env file at /frontend/ with the localhost link with port 3000 and then /api/ 
   useEffect(() => {
     async function grabData() {
-      const response = await axios.get(`${usersUrl}/3`);
+      const response = await axios.get(`${usersUrl}/6a0a5a599ca0a11d0d5bdf6d`);
       console.log(response);
     }
     console.log("all vite envs: ", import.meta.env);
+    console.log(`${usersUrl}`);
     console.log("vite_api_url: ", import.meta.env.VITE_API_URL);
-    console.log(`${usersUrl}/3`);
     grabData();
   }, []);
 
@@ -36,13 +36,25 @@ function Signup() {
       alert("Passwords do not match");
       return;
     }
+    /*
     console.log(
       "Username:", username,
       "Email:", email,
       "Password:"
     );
-
-    navbar("/Login");
+    */
+    //TODO: SALT PASSWORDS AND HASH !!!!! 
+    const newUser = { username: username, email: email, password: password };
+    const putUser = async () => {
+      try {
+        await axios.post(`${usersUrl}/`, newUser);
+        console.log('Success:', newUser);
+      } catch (error) {
+        console.error('Error: ', error);
+      }
+    };
+    putUser();
+    //    navbar("/Login");
   }
 
   return (
