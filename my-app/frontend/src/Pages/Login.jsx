@@ -1,8 +1,11 @@
-import {useState} from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios';
+
+const usersUrl = new URL('users', import.meta.env.VITE_API_URL);
 
 function Login() {
-  const navbar= useNavigate()
+  const navbar = useNavigate()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -13,23 +16,16 @@ function Login() {
     setError("")
     //lets call the backend and see if the user exists
     try {
-      const response = await fetch("http://localhost:5000/login", {   // we will change this later when the database is actually set up, lets  hope tomorrow
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password })
-      })
-      const data = await response.json()
-      if (response.ok) { //we got in, login was successful
-      } else {
-        setError(data.message)
-        return;
-      }
-      console.log("Login successful:")
-      navbar("/Library")
+      const response = await axios.post(`${usersUrl}/login`, { email, password });
+      const token = response.data.token;
+      localStorage.setItem('userToken', token);
+      //      navbar("/Library")
     } catch (error) {
-      setError("An error occurred while logging in")
+      if (error.response) {
+        alert(error.response.data.message);
+      } else {
+        console.error("login error: ", error.message);
+      }
     }
   }
 
@@ -43,61 +39,61 @@ function Login() {
         <p className="text-center text-gray-300 text-12 mg-12 ">
           Please enter your credentials to access the library.
         </p>
-            <div className="w-full max-w-md bg-[#111c33] border border-[#3f5f91] rounded-lg p-8 mt-8">
-        {error && (
-          <div className="mb-6 text-red-500/10 border border-red-400 rounded p-4 text-red-200 text-sm">
-            {error}
+        <div className="w-full max-w-md bg-[#111c33] border border-[#3f5f91] rounded-lg p-8 mt-8">
+          {error && (
+            <div className="mb-6 text-red-500/10 border border-red-400 rounded p-4 text-red-200 text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+
+            <div>
+              <label className="block mb-2 text-sm">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-1 rounded bg-[#111c33] border border-[#3f5f91] text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-1 rounded bg-[#111c33] border border-[#3f5f91] text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
+              />
+            </div>
+
+            <button
+              type="login"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+            >
+              Login
+            </button>
+          </form>
+
+          <div className="text-center mt-6">
+            <button onClick={() => navbar("/Signup")}
+              className="text-sm text-blue-400 hover:underline">
+              Not have an account? Signup
+            </button>
           </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-
-          <div>
-            <label className="block mb-2 text-sm">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-1 rounded bg-[#111c33] border border-[#3f5f91] text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 text-sm">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-1 rounded bg-[#111c33] border border-[#3f5f91] text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
-            />
-          </div>
-
-          <button
-            type="login"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-          >
-            Login
-          </button>
-        </form>
-
-        <div className="text-center mt-6">
-          <button onClick={() => navbar("/Signup")} 
-            className="text-sm text-blue-400 hover:underline">
-            Not have an account? Signup
-          </button>
         </div>
-      </div>
-    </main>
+      </main>
 
     </div>
   )
-      
+
 
 
 }

@@ -17,6 +17,7 @@ function Signup() {
   const [error, setError] = useState("");
 
 
+  /*
   //to get test working, add an .env file at /frontend/ with the localhost link with port 3000 and then /api/ 
   useEffect(() => {
     async function grabData() {
@@ -29,6 +30,7 @@ function Signup() {
     grabData();
   }, []);
 
+  */
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -53,7 +55,7 @@ function Signup() {
       }
     };
     putUser();
-    //    navbar("/Login");
+    navbar("/Login");
   }
 
   return (

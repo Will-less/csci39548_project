@@ -1,5 +1,6 @@
 import User from '../schema/User.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 //get
 export const getUser = async (req, res) => {
@@ -56,18 +57,41 @@ export const deleteUser = async (req, res) => {
   }
 }
 
-/*
-//post
+
+//post. Localstorage because of time constraints
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(400).json({ message: "Invalid email/password" });
     }
+    console.log(user);
+    console.log(user.password);
+    const isCorrect = await bcrypt.compare(password, user.password);
+    if (!isCorrect) {
+      return res.status(400).json({ message: "Invalid login" });
+    }
+    const token = jwt.sign({
+      id: user._id
+    },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
-  } catch
+    res.json({
+      token: token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Login failed", message: error.message });
+  }
 }
-*/
 
 //TODO: way of updating email/password
+//TODO: protected routes? 

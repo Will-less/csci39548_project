@@ -12,7 +12,7 @@ app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 3000;
 
-async function connectToCloud() {
+async function connect() {
   try {
     //either create a db named users or remove {dbName: 'users'} when you are testing
     await mongoose.connect(process.env.MONGO_URI, { dbName: 'users' });
@@ -26,4 +26,4 @@ async function connectToCloud() {
   }
 }
 
-connectToCloud();
+connect();
