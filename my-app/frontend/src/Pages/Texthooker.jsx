@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect, useRef, useLayoutEffect } from 'react';
 // useLocation used to recieve data passed from the Library page
 import { useLocation } from "react-router-dom"
+import { AuthContext } from '../Components/AuthContext.jsx'
 
 //need Textractor and Textractor websocket to use
 
@@ -160,6 +161,8 @@ function Texthooker() {
   // get file data passed form library page(selected file)
   const location = useLocation()
   const file = location.state;
+  const { userId } = useContext(AuthContext);
+  console.log("I have the userid: ", userId);
 
 
   //for Textractor connection 
