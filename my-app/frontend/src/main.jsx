@@ -7,10 +7,10 @@ import { AuthAuthenticator } from './Components/AuthContext.jsx';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthAuthenticator>
+    <AuthAuthenticator>
+      <BrowserRouter>
         <App />
-      </AuthAuthenticator>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AuthAuthenticator>
   </React.StrictMode>,
 );
