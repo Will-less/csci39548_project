@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useContext, useEffect, useState } from "react"
+import { data, useNavigate } from "react-router-dom"
+import { AuthContext } from "../Components/AuthContext.jsx"
+
+const BASE_URL = import.meta.env.VITE_API_URL
 
 function Library() {
-
+//gets login state so library can load from database or localStorage
+const { isLoggedIn, userID } = useContext(AuthContext)
 //Loads saved files for logged out users from browser storage
 const [savedFiles, setSavedFiles] = useState(() => {
   const saved = localStorage.getItem("files")
@@ -140,11 +144,50 @@ const [savedFiles, setSavedFiles] = useState(() => {
     setIsEditing(false)
   }
 
+//loads saved files fro database when the user is logged in
+useEffect(() => {
+  async function loadUserFiles() {
+    if (!isLoggedIn || !userID) {
+      return
+    }
+
+    try{
+      const response = await fetch(`${BASE_URL}/api/users/${userId}`)
+
+      if(!response.ok) {
+        throw new Error("Failed to load user files")
+      }
+
+      const user = await response.json()
+
+      const databaseFiles = user.text.map((doc) => ({
+        id: doc._id,
+        title: doc.title || "Untitled Document",
+        category: doc.category || "Uncategorized",
+        content: {
+          text: doc.textContent,
+          pages: doc.pages,
+        },
+        linecount: doc.textContent?.lineIds?.length || 0,
+        lastUpdated: "Saved to account",
+      }))
+
+      setSavedFiles(databaseFiles)
+      setSelectedFile(null)
+    } catch (error) {
+      console.error("Error loading account library:", error)
+    }
+  }
+
+  loadUserFiles()
+}, [isLoggedIn, userID])
 
   //saves files to browser storage whenever they change
   useEffect(() => {
-    localStorage.setItem("files", JSON.stringify(savedFiles))
-  }, [savedFiles])
+    if(!isLoggedIn) {
+      localStorage.setItem("files", JSON.stringify(savedFiles))
+    }
+  }, [savedFiles, isLoggedIn])
 
   //saves custom categories 
   useEffect(() => {

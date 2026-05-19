@@ -3,6 +3,8 @@ import { useState, useContext, useEffect, useRef, useLayoutEffect } from 'react'
 import { useLocation } from "react-router-dom"
 import { AuthContext } from '../Components/AuthContext.jsx'
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 //need Textractor and Textractor websocket to use
 
 
@@ -161,7 +163,7 @@ function Texthooker() {
   // get file data passed form library page(selected file)
   const location = useLocation()
   const file = location.state;
-  const { userId } = useContext(AuthContext);
+  const { isLoggedIn, userId } = useContext(AuthContext);
   console.log("I have the userid: ", userId);
 
 
@@ -203,13 +205,13 @@ function Texthooker() {
   useManual({ text, connected, setText, page, pages });
   usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
 
-  //saves all extracted lines as new library file
-  function handleSaveToLibrary() {
+  //Saves text to database when logged in, else saves to localStorage
+  async function handleSaveToLibrary() {
     const savedContent = {
       pages: pages,
       text: text,
     };
-
+  
     const newSavedFile = {
       id: Date.now(),
       title: `Saved Text ${new Date().toLocaleString()}`,
@@ -217,16 +219,48 @@ function Texthooker() {
       content: savedContent,
       linecount: savedContent.text.lineIds.length,
       lastUpdated: new Date().toLocaleString(),
+    };
+  
+    if (isLoggedIn) {
+      const token = localStorage.getItem("userToken");
+  
+      try {
+        const response = await fetch(`${BASE_URL}/api/users/save`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            text: {
+              title: newSavedFile.title,
+              textContent: text,
+              pages: pages,
+            },
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error("Database save failed");
+        }
+  
+        setSaveMessage("Saved to account Library!");
+      } catch (error) {
+        console.error(error);
+        setSaveMessage("Could not save to account.");
+      }
+  
+      return;
     }
-
-    const existingFiles = JSON.parse(localStorage.getItem("files")) || []
-
+  
+    const existingFiles = JSON.parse(localStorage.getItem("files")) || [];
+  
     localStorage.setItem(
       "files",
       JSON.stringify([...existingFiles, newSavedFile])
-    )
-
-    setSaveMessage("Saved to Library!")
+    );
+  
+    setSaveMessage("Saved to local Library!");
   }
 
 
