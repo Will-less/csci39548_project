@@ -1,10 +1,8 @@
-import { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { useState, useContext, useEffect, useRef, useLayoutEffect } from 'react';
 // useLocation used to recieve data passed from the Library page
 import { useLocation } from "react-router-dom"
 
-
 //need Textractor and Textractor websocket to use
-const URL = "ws://localhost:6677";
 
 //>50 guarantees that the page is filled if each extracted "line" does not wrap around and only takes up one line
 //there could be a smaller value, however
@@ -28,32 +26,55 @@ function getText({ setText, extract }) {
 }
 
 
-function useTextractor({ text, setText, setConnected, page, pages }) {
+function useTextractor({ setText, setConnected }) {
+  const socketRef = useRef(null);
+  let socketTimeout;
+
   useEffect(() => {
-    const socket = new WebSocket(URL);
 
-    socket.onopen = () => {
-      setConnected(true);
-    };
+    //prevents crashing due to request spam 
+    socketTimeout = setTimeout(() => {
 
-    socket.onmessage = (e) => {
-      let exText = e.data;
-      try {
-        getText({ setText, extract: exText });
-      } catch (e) {
-        console.log(e);
+
+      const URL = "ws://localhost:6677";
+      const socket = new WebSocket(URL);
+      socketRef.current = socket;
+
+      socket.onopen = () => {
+        setConnected(true);
+      };
+
+      socket.onmessage = (e) => {
+        if (socket != socketRef.current)
+          return;
+        let exText = e.data;
+        try {
+          getText({ setText, extract: exText });
+        } catch (e) {
+          console.log(e);
+        }
       }
-    }
 
-
-    socket.onerror = () => {
-      console.log("starting manual mode");
-      setConnected(false);
-    }
+      socket.onerror = () => {
+        console.log("starting manual mode");
+        setConnected(false);
+      }
+    }, 500);
 
     return () => {
+      clearTimeout(socketTimeout);
+      if (socketRef.current) {
+        socketRef.current.onopen = null;
+        socketRef.current.onmessage = null;
+        socketRef.current.onerror = null;
+        socketRef.current.onclose = null;
+        setConnected(false);
+        if (socketRef.current.readyState <= 1) {
+          socketRef.current.close(1000);
+        }
+        socketRef.current = null;
+      }
       setConnected(false);
-      socket.close();
     }
 
   }, []);
@@ -174,7 +195,7 @@ function Texthooker() {
   //feedback after saving text to library
   const [saveMessage, setSaveMessage] = useState("")
 
-  useTextractor({ text, setText, setConnected, page, pages });
+  useTextractor({ setText, setConnected });
   useManual({ text, connected, setText, page, pages });
   usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
 
