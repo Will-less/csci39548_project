@@ -3,36 +3,20 @@ import { useNavigate } from "react-router-dom"
 
 function Library() {
 
-  //dummy data |  NOTE: the dummy data are broken
-  const [savedFiles, setSavedFiles] = useState(() => {
-    const saved = localStorage.getItem("files")
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 1,
-        title: "Japanese Game Notes",
-        category: "Visual Novel",
-        content: "これはサンプルテキストです",
-        linecount: 42,
-        lastUpdated: "Apr 30, 2026",
-      },
-      {
-        id: 2,
-        title: "Vocabulary Practice",
-        category: "Study",
-        content: "Word list goes here",
-        linecount: 30,
-        lastUpdated: "May 30, 2026",
-      },
-      {
-        id: 3,
-        title: "Chapter 1 Text",
-        category: "Reading",
-        content: "Once upon a time",
-        linecount: 23,
-        lastUpdated: "Apr 10, 2026",
-      },
-    ]
-  })
+//Loads saved files for logged out users from browser storage
+const [savedFiles, setSavedFiles] = useState(() => {
+  const saved = localStorage.getItem("files")
+
+  if (!saved) {
+    return []
+  }
+
+  try {
+    return JSON.parse(saved)
+  } catch {
+    return []
+  }
+})
 
   //tracks selected file and search/filter inputs
   const [selectedFile, setSelectedFile] = useState(null)
@@ -364,13 +348,17 @@ function Library() {
         {/* Message when no files match search/filter */}
         {filteredFiles.length === 0 && (
           <div className="text-center text-gray-400 mt-8">
-            <p className="text-xl">No matching files found.</p>
+            <p className="text-xl">
+              {savedFiles.length === 0 ? "No saved files yet." : "No matching files found."}
+            </p>
+
             <p className="text-sm mt-2">
-              Try searching by title or category.
+              {savedFiles.length === 0
+              ? "Save text from Texthooker to see it here."
+              : "Try searching by title or category."}
             </p>
           </div>
         )}
-
         {/* grid of saved file cards */}
         {filteredFiles.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-5xl mx-auto">
