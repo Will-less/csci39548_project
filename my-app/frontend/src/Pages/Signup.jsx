@@ -75,7 +75,7 @@ function Signup() {
 
         <div className="w-full max-w-md bg-[#111c33] border border-[#3f5f91] rounded-lg p-8 mt-8">
           {error && (
-            <div className="mb-6 text-red-500/10 border border-red-400 rounded p-4 text-red-200 text-sm">
+            <div className="mb-6 text-red-200 border border-red-400 rounded p-4 text-sm">
               {error}
             </div>
           )}
@@ -141,10 +141,11 @@ function Signup() {
             </button>
           </form>
 
-          <div className="text-center mt-6">
+          <div className="text-sm text-center mt-6">
+            Already have an account? 
             <button onClick={() => navbar("/Login")}
-              className="text-sm text-blue-400 hover:underline">
-              Already have an account? Login
+              className="ml-1 text-sm text-blue-400 hover:underline">
+              Login
             </button>
           </div>
         </div>

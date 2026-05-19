@@ -178,12 +178,8 @@ function Library() {
           View and open text pages saved from Texthooker.
         </p>
 
-        <h2 className="text-center text-3xl mt-10 mb-10">
-          Saved files
-        </h2>
-
         {/* Search bar, category filter, and custom controls */}
-        <div className="flex flex-col items-center gap-6 mb-10">
+        <div className="flex flex-wrap items-center gap-6 mb-10">
           <input
             type="text"
             value={searchTerm}
@@ -191,7 +187,7 @@ function Library() {
             placeholder="Search saved files..."
             className="w-full px-4 py-3 rounded bg-[#111c33] border border-[#3f5f91] text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
           />
-
+          
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -217,18 +213,18 @@ function Library() {
             <option value="Z-A">Z-A</option>
           </select>
 
-          <div className="flex gap-3 mt-4">
+          <div className="flex items-end gap-3 ml-auto">
             <input
               type="text"
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
               placeholder="Add new category..."
-              className="px-4 py-2 rounded bg-[#111c33] border border-[#3f5f91] text-white"
+              className="px-4 py-3 rounded bg-[#111c33] border border-[#3f5f91] text-white"
             />
 
             <button
               onClick={handleAddCategory}
-              className="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded text-white"
+              className="bg-purple-700 hover:bg-purple-800 px-4 py-3 rounded text-white"
             >
               Add
             </button>
