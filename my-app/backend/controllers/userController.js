@@ -59,6 +59,21 @@ export const updateUser = async (req, res) => {
   }
 }
 
+export const authUser = async (req, res, next) => {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith('Bearer')) {
+    return res.status(401).json({ error: "token required" });
+  }
+  const token = header.split(" ")[1];
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id: decoded.id };
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'request not authorized' });
+  }
+}
+
 export const deleteUser = async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id)
