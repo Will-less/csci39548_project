@@ -29,6 +29,7 @@ export const AuthAuthenticator = ({ children }) => {
     const token = localStorage.getItem('userToken');
     if (token)
       handleLogin(token);
+    setLoading(false);
   }, []);
 
   const login = (token) => {
