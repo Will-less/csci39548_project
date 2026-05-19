@@ -85,10 +85,11 @@ function Login() {
             </button>
           </form>
 
-          <div className="text-center mt-6">
+          <div className="text-center text-sm mt-6">
+            Don't have an account?
             <button onClick={() => navbar("/Signup")}
-              className="text-sm text-blue-400 hover:underline">
-              Not have an account? Signup
+              className="ml-1 text-sm text-blue-400 hover:underline">
+              Sign up
             </button>
           </div>
         </div>
