@@ -2,18 +2,19 @@ import React, { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
 export const AuthContext = createContext();
+
 export const AuthAuthenticator = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
 
   const handleLogin = (token) => {
-    if(!token || typeof token !== 'string') {
+    if (!token || typeof token !== 'string') {
       console.warn("bad token");
       setLoading(false);
       return;
     }
-    
+
     try {
       const decoded = jwtDecode(token);
       setUserId(decoded.id);
@@ -24,14 +25,15 @@ export const AuthAuthenticator = ({ children }) => {
       setIsLoggedIn(false);
       setUserId(null);
     }
+
     setLoading(false);
   };
 
-  //checks for existing login token when the app first loads
+  // Checks for an existing login token when the app first loads
   useEffect(() => {
     const token = localStorage.getItem('userToken');
 
-    if(token) {
+    if (token) {
       handleLogin(token);
     } else {
       setLoading(false);
@@ -48,7 +50,6 @@ export const AuthAuthenticator = ({ children }) => {
     setIsLoggedIn(false);
     setUserId(null);
   }
-
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, login, logout, loading, userId }}>
