@@ -1,38 +1,26 @@
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useContext, useEffect, useState } from "react"
+import { data, useNavigate } from "react-router-dom"
+import { AuthContext } from "../Components/AuthContext.jsx"
+
+const BASE_URL = import.meta.env.VITE_API_URL
 
 function Library() {
+//gets login state so library can load from database or localStorage
+const { isLoggedIn, userID } = useContext(AuthContext)
+//Loads saved files for logged out users from browser storage
+const [savedFiles, setSavedFiles] = useState(() => {
+  const saved = localStorage.getItem("files")
 
-  //dummy data |  NOTE: the dummy data are broken
-  const [savedFiles, setSavedFiles] = useState(() => {
-    const saved = localStorage.getItem("files")
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 1,
-        title: "Japanese Game Notes",
-        category: "Visual Novel",
-        content: "これはサンプルテキストです",
-        linecount: 42,
-        lastUpdated: "Apr 30, 2026",
-      },
-      {
-        id: 2,
-        title: "Vocabulary Practice",
-        category: "Study",
-        content: "Word list goes here",
-        linecount: 30,
-        lastUpdated: "May 30, 2026",
-      },
-      {
-        id: 3,
-        title: "Chapter 1 Text",
-        category: "Reading",
-        content: "Once upon a time",
-        linecount: 23,
-        lastUpdated: "Apr 10, 2026",
-      },
-    ]
-  })
+  if (!saved) {
+    return []
+  }
+
+  try {
+    return JSON.parse(saved)
+  } catch {
+    return []
+  }
+})
 
   //tracks selected file and search/filter inputs
   const [selectedFile, setSelectedFile] = useState(null)
@@ -156,11 +144,50 @@ function Library() {
     setIsEditing(false)
   }
 
+//loads saved files fro database when the user is logged in
+useEffect(() => {
+  async function loadUserFiles() {
+    if (!isLoggedIn || !userID) {
+      return
+    }
+
+    try{
+      const response = await fetch(`${BASE_URL}/api/users/${userId}`)
+
+      if(!response.ok) {
+        throw new Error("Failed to load user files")
+      }
+
+      const user = await response.json()
+
+      const databaseFiles = user.text.map((doc) => ({
+        id: doc._id,
+        title: doc.title || "Untitled Document",
+        category: doc.category || "Uncategorized",
+        content: {
+          text: doc.textContent,
+          pages: doc.pages,
+        },
+        linecount: doc.textContent?.lineIds?.length || 0,
+        lastUpdated: "Saved to account",
+      }))
+
+      setSavedFiles(databaseFiles)
+      setSelectedFile(null)
+    } catch (error) {
+      console.error("Error loading account library:", error)
+    }
+  }
+
+  loadUserFiles()
+}, [isLoggedIn, userID])
 
   //saves files to browser storage whenever they change
   useEffect(() => {
-    localStorage.setItem("files", JSON.stringify(savedFiles))
-  }, [savedFiles])
+    if(!isLoggedIn) {
+      localStorage.setItem("files", JSON.stringify(savedFiles))
+    }
+  }, [savedFiles, isLoggedIn])
 
   //saves custom categories 
   useEffect(() => {
@@ -360,13 +387,17 @@ function Library() {
         {/* Message when no files match search/filter */}
         {filteredFiles.length === 0 && (
           <div className="text-center text-gray-400 mt-8">
-            <p className="text-xl">No matching files found.</p>
+            <p className="text-xl">
+              {savedFiles.length === 0 ? "No saved files yet." : "No matching files found."}
+            </p>
+
             <p className="text-sm mt-2">
-              Try searching by title or category.
+              {savedFiles.length === 0
+              ? "Save text from Texthooker to see it here."
+              : "Try searching by title or category."}
             </p>
           </div>
         )}
-
         {/* grid of saved file cards */}
         {filteredFiles.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-5xl mx-auto">
