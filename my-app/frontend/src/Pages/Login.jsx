@@ -7,7 +7,7 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 
 function Login() {
   const navbar = useNavigate()
-  const {login} = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -21,6 +21,7 @@ function Login() {
       const response = await axios.post(`${BASE_URL}/api/users/login`, { email, password });
       const token = response.data.token;
       login(token);
+      console.log(token)
       navbar("/Library");
     } catch (error) {
       if (error.response) {

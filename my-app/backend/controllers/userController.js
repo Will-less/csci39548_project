@@ -27,13 +27,13 @@ export const createUser = async (req, res) => {
     const newUser = await User.create({ username, email, password: hashPass, text });
     res.status(201).json({ status: "user created" });
   } catch (error) {
-    if(error.code === 1100){
-      if(error.keyPattern.username){
+    if (error.code === 1100) {
+      if (error.keyPattern.username) {
         return res.status(400).json({
           message: "Username already taken"
         });
       }
-      if (error.keyPattern.email){
+      if (error.keyPattern.email) {
         return res.status(400).json({
           message: "Email already registerd"
         });
@@ -51,7 +51,7 @@ export const updateUser = async (req, res) => {
     const { text } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
-      { text },
+      { $push: { text: text } },
       { new: true }
     );
   } catch (error) {
