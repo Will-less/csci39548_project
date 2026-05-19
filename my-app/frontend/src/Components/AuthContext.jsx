@@ -17,7 +17,7 @@ export const AuthAuthenticator = ({ children }) => {
         console(userId);
       } catch (error) {
         console.error("invalid token");
-        localStorage.remove(userToken);
+        localStorage.removeItem('userToken');
       }
     }
     setLoading(false);
