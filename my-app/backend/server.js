@@ -1,0 +1,29 @@
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import userRoutes from './routes/userRoutes.js'
+
+const app = express();
+app.use(cors());
+app.use(express.json())
+dotenv.config({ path: './.env' });
+app.use('/api/users', userRoutes);
+
+const PORT = process.env.PORT || 3000;
+
+async function connect() {
+  try {
+    //either create a db named users or remove {dbName: 'users'} when you are testing
+    await mongoose.connect(process.env.MONGO_URI, { dbName: 'users' });
+    console.log("successfully connected to MongoDB Atlas Cloud!");
+    app.listen(PORT, () => {
+      console.log(`Server listening on port ${PORT}`)
+    })
+  } catch (e) {
+    console.error("failure:", e.message);
+    process.exit(1);
+  }
+}
+
+connect();

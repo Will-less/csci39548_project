@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "express": "^5.2.1",
-    "mongodb": "^7.1.1",
+    "axios": "^1.16.1",
+    "dotenv": "^17.4.2",
+    "jwt-decode": "^4.0.0",
+    "mongodb": "^7.2.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",
