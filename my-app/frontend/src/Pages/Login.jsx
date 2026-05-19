@@ -44,7 +44,7 @@ function Login() {
         </p>
         <div className="w-full max-w-md bg-[#111c33] border border-[#3f5f91] rounded-lg p-8 mt-8">
           {error && (
-            <div className="mb-6 text-red-500/10 border border-red-400 rounded p-4 text-red-200 text-sm">
+            <div className="mb-6 border border-red-400 rounded p-4 text-red-200 text-sm">
               {error}
             </div>
           )}

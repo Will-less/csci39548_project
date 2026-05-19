@@ -217,18 +217,43 @@ function Texthooker() {
       content: savedContent,
       linecount: savedContent.text.lineIds.length,
       lastUpdated: new Date().toLocaleString(),
+    };
+
+    if (userId) 
+    {
+      try {
+        const token = localStorage.getItem("token");
+        const response = fetch(`http://localhost:6677/users/${userId}`,
+          {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json", Authorization: `Bearer ${token}`,},
+            body: JSON.stringify({
+              text: newSavedFile,
+            }),
+          }
+        );
+
+        if(!response.ok) 
+        {
+          throw new Error("Failed to save to database.");
+        }
+        setSaveMessage("Saved to database!");
+
+      } 
+      catch(error) 
+      {
+        console.log(error);
+        setSaveMessage("Database save failed.");
+      }
     }
-
-    const existingFiles = JSON.parse(localStorage.getItem("files")) || []
-
-    localStorage.setItem(
-      "files",
-      JSON.stringify([...existingFiles, newSavedFile])
-    )
-
-    setSaveMessage("Saved to Library!")
+    else 
+    {
+      const existingFiles = JSON.parse(localStorage.getItem("files")) || [];
+      localStorage.setItem("files", JSON.stringify([...existingFiles, newSavedFile]));
+      
+      setSaveMessage("Saved to local storage!");
+    }
   }
-
 
   function goToPage(pageNumber) {
     setPageNum(pageNumber);

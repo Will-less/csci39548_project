@@ -1,6 +1,8 @@
 function Home() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-white text-center px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center 
+    
+    bg-[#0f172a] text-white text-center">
       <main>
         <h1 className="text-6xl font-semibold mb-10">Welcome to Texthooker.</h1>
       </main>

@@ -379,7 +379,7 @@ function Library() {
                   setEditedCategory(file.category)
                   setIsEditing(false)
                 }}
-                className="w-full min-h-[140px] bg-[#334a70] border border-[#3f5f91] rounded-lg flex flex-col items-center justify-center text-center hover:bg-[#3f5f91] hover:scale-105 transition duration-200 cursor-pointer p-6 shadow-lg"
+                className="w-full min-h-35 bg-[#334a70] border border-[#3f5f91] rounded-lg flex flex-col items-center justify-center text-center hover:bg-[#3f5f91] hover:scale-105 transition duration-200 cursor-pointer p-6 shadow-lg"
               >
                 <p className="text-xl font-medium">{file.title}</p>
                 <p className="text-sm text-gray-300 mt-1">{file.category}</p>
