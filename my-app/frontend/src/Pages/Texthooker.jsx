@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom"
 
 //need Textractor and Textractor websocket to use
 
+
 //>50 guarantees that the page is filled if each extracted "line" does not wrap around and only takes up one line
 //there could be a smaller value, however
 const pageLines = 50;

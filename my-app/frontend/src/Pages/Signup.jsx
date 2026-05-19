@@ -48,12 +48,11 @@ function Signup() {
     const newUser = { username: username, email: email, password: password };
     const putUser = async () => {
       try {
-        await axios.post(`${BASE_URL}/register`, newUser);
-        console.log('Success:', newUser);
+        await axios.post(`${BASE_URL}/api/users/register`, newUser);
       } catch (error) {
-        if (error.response){
+        if (error.response) {
           setError(error.response.data.message);
-        } else{
+        } else {
           setError("Signup failed");
         }
         console.error('Error', error);
