@@ -8,10 +8,12 @@ export const AuthAuthenticator = ({ children }) => {
   const [userId, setUserId] = useState(null);
 
   const handleLogin = (token) => {
-    if (!token || typeof token !== 'string') {
+    if(!token || typeof token !== 'string') {
       console.warn("bad token");
+      setLoading(false);
       return;
     }
+    
     try {
       const decoded = jwtDecode(token);
       setUserId(decoded.id);
@@ -25,10 +27,15 @@ export const AuthAuthenticator = ({ children }) => {
     setLoading(false);
   };
 
+  //checks for existing login token when the app first loads
   useEffect(() => {
     const token = localStorage.getItem('userToken');
-    if (token)
+
+    if(token) {
       handleLogin(token);
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const login = (token) => {
