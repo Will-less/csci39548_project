@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 
 import axios from 'axios';
-
-const usersUrl = new URL('users', import.meta.env.VITE_API_URL);
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 function Signup() {
   const navbar = useNavigate();
@@ -34,6 +33,7 @@ function Signup() {
 
   function handleSubmit(e) {
     e.preventDefault();
+    setError("");
     if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
@@ -48,14 +48,19 @@ function Signup() {
     const newUser = { username: username, email: email, password: password };
     const putUser = async () => {
       try {
-        await axios.post(`${usersUrl}/register`, newUser);
+        await axios.post(`${BASE_URL}/register`, newUser);
         console.log('Success:', newUser);
       } catch (error) {
-        console.error('Error: ', error);
+        if (error.response){
+          setError(error.response.data.message);
+        } else{
+          setError("Signup failed");
+        }
+        console.error('Error', error);
       }
     };
     putUser();
-    navbar("/Login");
+    navbar("/Library");
   }
 
   return (

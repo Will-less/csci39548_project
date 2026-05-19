@@ -23,8 +23,8 @@ export const AuthAuthenticator = ({ children }) => {
 
 
   return (
-    <AuthContext value={{ isLoggedIn, login, logout, loading }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, loading }}>
       {!loading && children}
-    </AuthContext>
+    </AuthContext.Provider>
   );
 };

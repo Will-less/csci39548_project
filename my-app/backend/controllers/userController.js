@@ -27,7 +27,21 @@ export const createUser = async (req, res) => {
     const newUser = await User.create({ username, email, password: hashPass, text });
     res.status(201).json({ status: "user created" });
   } catch (error) {
-    res.status(400).json({ status: "failed to create user", message: error.message })
+    if(error.code === 1100){
+      if(error.keyPattern.username){
+        return res.status(400).json({
+          message: "Username already taken"
+        });
+      }
+      if (error.keyPattern.email){
+        return res.status(400).json({
+          message: "Email already registerd"
+        });
+      }
+    }
+    res.status(400).json({
+      message: error.message
+    });
   }
 };
 
