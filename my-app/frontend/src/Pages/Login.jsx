@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
+import { AuthContext } from '../Components/AuthContext';
 
-const usersUrl = new URL('users', import.meta.env.VITE_API_URL);
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 function Login() {
   const navbar = useNavigate()
+  const {login} = useContext(AuthContext);
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -16,10 +18,10 @@ function Login() {
     setError("")
     //lets call the backend and see if the user exists
     try {
-      const response = await axios.post(`${usersUrl}/login`, { email, password });
+      const response = await axios.post(`${BASE_URL}/api/users/login`, { email, password });
       const token = response.data.token;
-      localStorage.setItem('userToken', token);
-      //      navbar("/Library")
+      login(token);
+      navbar("/Library");
     } catch (error) {
       if (error.response) {
         alert(error.response.data.message);
@@ -75,7 +77,7 @@ function Login() {
             </div>
 
             <button
-              type="login"
+              type="submit"
               className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
             >
               Login

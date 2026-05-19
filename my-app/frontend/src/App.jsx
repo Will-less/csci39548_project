@@ -10,7 +10,7 @@ import Library from './Pages/Library';
 import Texthooker from './Pages/Texthooker';
 import Nil from './Components/Nil';
 import Footer from "./Components/Footer";
-
+import ProtectedRoute from './Components/ProtectedRoute';
 
 function App() {
 
