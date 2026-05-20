@@ -190,8 +190,8 @@ function Texthooker() {
 
   useEffect(() => {
     if (file) {
-      setText(file.content.text);
-      setPages(file.content.pages);
+      setText(file.text.text);
+      setPages(file.pages);
 
     }
   }, [file]);

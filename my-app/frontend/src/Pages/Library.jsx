@@ -164,10 +164,11 @@ function Library() {
           text: {
             text: doc.textContent,
           },
-          pages: doc.pages.size,
+          pages: doc.pages,
           linecount: doc.textContent?.lineIds?.length || 0,
           lastUpdated: "Saved to account",
         }))
+
         setSavedFiles(databaseFiles)
         setSelectedFile(null)
       } catch (error) {
@@ -345,7 +346,12 @@ function Library() {
                 </button>
               )}
               <button
-                onClick={() => navigate("/Texthooker", { state: selectedFile })}
+                onClick={() => {
+                  // console.log(selectedFile.pages);
+                  //console.log(selectedFile.text.text);
+                  navigate("/Texthooker", { state: selectedFile })
+                }
+                }
                 className="bg-purple-700 hover:bg-purple-800 px-6 py-3 rounded text-white "
               >
                 Open file
@@ -378,51 +384,56 @@ function Library() {
               </button>
             </div>
           </div>
-        )}
+        )
+        }
 
         {/* Message when no files match search/filter */}
-        {filteredFiles.length === 0 && (
-          <div className="text-center text-gray-400 mt-8">
-            <p className="text-xl">
-              {savedFiles.length === 0 ? "No saved files yet." : "No matching files found."}
-            </p>
+        {
+          filteredFiles.length === 0 && (
+            <div className="text-center text-gray-400 mt-8">
+              <p className="text-xl">
+                {savedFiles.length === 0 ? "No saved files yet." : "No matching files found."}
+              </p>
 
-            <p className="text-sm mt-2">
-              {savedFiles.length === 0
-                ? "Save text from Texthooker to see it here."
-                : "Try searching by title or category."}
-            </p>
-          </div>
-        )}
+              <p className="text-sm mt-2">
+                {savedFiles.length === 0
+                  ? "Save text from Texthooker to see it here."
+                  : "Try searching by title or category."}
+              </p>
+            </div>
+          )
+        }
         {/* grid of saved file cards */}
-        {filteredFiles.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-5xl mx-auto">
-            {filteredFiles.map((file) => (
-              <div
-                key={file.id}
-                onClick={() => {
-                  setSelectedFile(file)
-                  setEditedTitle(file.title)
-                  setEditedCategory(file.category)
-                  setIsEditing(false)
-                }}
-                className="w-full min-h-35 bg-[#334a70] border border-[#3f5f91] rounded-lg flex flex-col items-center justify-center text-center hover:bg-[#3f5f91] hover:scale-105 transition duration-200 cursor-pointer p-6 shadow-lg"
-              >
-                <p className="text-xl font-medium">{file.title}</p>
-                <p className="text-sm text-gray-300 mt-1">{file.category}</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {file.linecount} lines saved
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Updated {file.lastUpdated}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+        {
+          filteredFiles.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-5xl mx-auto">
+              {filteredFiles.map((file) => (
+                <div
+                  key={file.id}
+                  onClick={() => {
+                    setSelectedFile(file)
+                    setEditedTitle(file.title)
+                    setEditedCategory(file.category)
+                    setIsEditing(false)
+                  }}
+                  className="w-full min-h-35 bg-[#334a70] border border-[#3f5f91] rounded-lg flex flex-col items-center justify-center text-center hover:bg-[#3f5f91] hover:scale-105 transition duration-200 cursor-pointer p-6 shadow-lg"
+                >
+                  <p className="text-xl font-medium">{file.title}</p>
+                  <p className="text-sm text-gray-300 mt-1">{file.category}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {file.linecount} lines saved
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Updated {file.lastUpdated}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )
+        }
 
-      </main>
-    </div>
+      </main >
+    </div >
   )
 }
 export default Library
