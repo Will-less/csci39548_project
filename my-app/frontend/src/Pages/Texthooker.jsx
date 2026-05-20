@@ -222,30 +222,25 @@ function Texthooker() {
       lastUpdated: new Date().toLocaleString(),
     };
 
-    if(isLoggedIn) 
-    {
+    if (isLoggedIn) {
       const token = localStorage.getItem("userToken");
 
       try {
-        const backendDocument = 
+        const backendDocument =
         {
           title: newSavedFile.title,
-          category: newSavedFile.category,
-          textContent: 
+          textContent:
           {
             lineIds: text.lineIds,
             lines: text.lines,
             currLine: text.currLine,
           },
           pages: pages,
-          linecount: text.lineIds.length,
-          lastUpdated: new Date().toISOString(),
         };
 
-        const response = await axios.patch(`${BASE_URL}/api/users/save`, {text: backendDocument,},{headers: {Authorization: `Bearer ${token}`,"Content-Type": "application/json",},});
+        const response = await axios.patch(`${BASE_URL}/api/users/save`, { text: backendDocument, }, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", }, });
 
-        if (response.status !== 200) 
-        {
+        if (response.status !== 200) {
           throw new Error("Database save failed");
         }
         setSaveMessage("Saved to account Library!");
@@ -254,16 +249,17 @@ function Texthooker() {
         setSaveMessage("Could not save to account.");
       }
       return;
+    } else {
+
+      const existingFiles = JSON.parse(localStorage.getItem("files")) || [];
+
+      localStorage.setItem(
+        "files",
+        JSON.stringify([...existingFiles, newSavedFile])
+      );
+
+      setSaveMessage("Saved to local Library!");
     }
-
-    const existingFiles = JSON.parse(localStorage.getItem("files")) || [];
-
-    localStorage.setItem(
-      "files",
-      JSON.stringify([...existingFiles, newSavedFile])
-    );
-
-    setSaveMessage("Saved to local Library!");
   }
 
   function goToPage(pageNumber) {

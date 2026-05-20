@@ -30,13 +30,13 @@ export const createUser = async (req, res) => {
   } catch (error) {
     console.log("Error:", error);
     if (error?.code === 11000) {
-      const field = error.keys? Object.keys(error.keyPattern)[0]: null;
+      const field = error.keys ? Object.keys(error.keyPattern)[0] : null;
       let message = "Duplicated field error";
 
       if (field === "email") message = "Email already registered";
       if (field === "username") message = "Username already taken";
 
-      return res.status(400).json({message});
+      return res.status(400).json({ message });
     }
     return res.status(400).json({
       message: error.message || "Something went wrong"
@@ -51,8 +51,11 @@ export const updateUser = async (req, res) => {
   try {
     console.log("help me");
     const { text } = req.body;
+
+    const id = req.user.id;
+
     const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
+      id,
       { $push: { text: text } },
       { returnDocument: 'after' }
     );

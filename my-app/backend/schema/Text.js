@@ -23,10 +23,7 @@ export const textSchema = new mongoose.Schema({
     },
     currLine: Number
   },
-  pages: {
-    type: [Schema.Types.ObjectId],
-    ref: 'Page'
-  }
+  pages: [pageSchema]
 
 })
 
