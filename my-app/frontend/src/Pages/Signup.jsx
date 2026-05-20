@@ -49,7 +49,12 @@ function Signup() {
     const putUser = async () => {
       try {
         await axios.post(`${BASE_URL}/api/users/register`, newUser);
+        navbar("/Login");
       } catch (error) {
+        console.log("FULL ERROR:", error.response?.data);
+        console.log("STATUS:", error.response?.status);
+        const message = error.response?.data?.message || 
+        "Signup failed. Please try again.";
         if (error.response) {
           setError(error.response.data.message);
         } else {
@@ -59,7 +64,7 @@ function Signup() {
       }
     };
     putUser();
-    navbar("/Library");
+
   }
 
   return (
