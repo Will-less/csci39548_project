@@ -18,6 +18,7 @@ export const getUser = async (req, res) => {
 
 //register; post
 export const createUser = async (req, res) => {
+  console.log("BODY RECIEVED:", req.body)
   try {
     const { username, email, password, text } = req.body;
 
@@ -27,20 +28,18 @@ export const createUser = async (req, res) => {
     const newUser = await User.create({ username, email, password: hashPass, text });
     res.status(201).json({ status: "user created" });
   } catch (error) {
-    if (error.code === 1100) {
-      if (error.keyPattern.username) {
-        return res.status(400).json({
-          message: "Username already taken"
-        });
-      }
-      if (error.keyPattern.email) {
-        return res.status(400).json({
-          message: "Email already registerd"
-        });
-      }
+    console.log("Error:", error);
+    if (error?.code === 11000) {
+      const field = error.keys? Object.keys(error.keyPattern)[0]: null;
+      let message = "Duplicated field error";
+
+      if (field === "email") message = "Email already registered";
+      if (field === "username") message = "Username already taken";
+
+      return res.status(400).json({message});
     }
-    res.status(400).json({
-      message: error.message
+    return res.status(400).json({
+      message: error.message || "Something went wrong"
     });
   }
 };
