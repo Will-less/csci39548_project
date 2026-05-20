@@ -46,15 +46,20 @@ export const createUser = async (req, res) => {
 };
 
 //update  - separate from email/password update; PATCH
+//need to manually construct the schema
+//structure it in the frontend
 export const updateUser = async (req, res) => {
   try {
+    console.log("help me");
     const { text } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       { $push: { text: text } },
-      { new: true }
+      { returnDocument: 'after' }
     );
+    return res.status(200).json({ status: "success", data: updatedUser });
   } catch (error) {
+    console.log("joe");
     res.status(400).json({ status: "fail", message: error.message });
   }
 }
@@ -62,14 +67,16 @@ export const updateUser = async (req, res) => {
 export const authUser = async (req, res, next) => {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer')) {
+    console.log("hello");
     return res.status(401).json({ error: "token required" });
   }
   const token = header.split(" ")[1];
   try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = { id: decoded.id };
     next();
   } catch (error) {
+    console.log(error);
     return res.status(401).json({ error: 'request not authorized' });
   }
 }
