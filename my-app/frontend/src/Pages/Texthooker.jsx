@@ -2,6 +2,7 @@ import { useState, useContext, useEffect, useRef, useLayoutEffect } from 'react'
 // useLocation used to recieve data passed from the Library page
 import { useLocation } from "react-router-dom"
 import { AuthContext } from '../Components/AuthContext.jsx'
+import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -211,7 +212,7 @@ function Texthooker() {
       pages: pages,
       text: text,
     };
-  
+
     const newSavedFile = {
       id: Date.now(),
       title: `Saved Text ${new Date().toLocaleString()}`,
@@ -220,46 +221,56 @@ function Texthooker() {
       linecount: savedContent.text.lineIds.length,
       lastUpdated: new Date().toLocaleString(),
     };
-  
+
     if (isLoggedIn) {
       const token = localStorage.getItem("userToken");
-  
+
       try {
-        const response = await fetch(`${BASE_URL}/api/users/save`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            text: {
-              title: newSavedFile.title,
-              textContent: text,
-              pages: pages,
-            },
-          }),
-        });
-  
+        /*
+                const response = await fetch(`${BASE_URL}/api/users/save`, {
+                  method: "PATCH",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    text: {
+                      title: newSavedFile.title,
+                      textContent: text,
+                      pages: pages,
+                    },
+                  }),
+                });
+        */
+
+        const response = await axios.patch(`${BASE_URL}/api/users/save`, { text: text },
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
         if (!response.ok) {
-          throw new Error("Database save failed");
+          throw new Error(`Database save failed:${response.statusText}`);
         }
-  
+
         setSaveMessage("Saved to account Library!");
       } catch (error) {
         console.error(error);
         setSaveMessage("Could not save to account.");
       }
-  
+
       return;
     }
-  
+
     const existingFiles = JSON.parse(localStorage.getItem("files")) || [];
-  
+
     localStorage.setItem(
       "files",
       JSON.stringify([...existingFiles, newSavedFile])
     );
-  
+
     setSaveMessage("Saved to local Library!");
   }
 
