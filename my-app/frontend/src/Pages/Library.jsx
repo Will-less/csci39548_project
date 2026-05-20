@@ -156,7 +156,6 @@ function Library() {
       try {
         const response = await axios.get(`${BASE_URL}/api/users/${userId}`)
 
-
         const databaseFiles = response.data.text.map((doc) => ({
           id: doc._id,
           title: doc.title || "Untitled Document",

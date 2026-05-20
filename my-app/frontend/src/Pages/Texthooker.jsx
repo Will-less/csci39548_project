@@ -192,7 +192,6 @@ function Texthooker() {
     if (file) {
       setText(file.text.text);
       setPages(file.pages);
-
     }
   }, [file]);
 
@@ -208,27 +207,14 @@ function Texthooker() {
 
   //Saves text to database when logged in, else saves to localStorage
   async function handleSaveToLibrary() {
-    const savedContent = {
-      pages: pages,
-      text: text,
-    };
-
-    const newSavedFile = {
-      id: Date.now(),
-      title: `Saved Text ${new Date().toLocaleString()}`,
-      category: "Uncategorized",
-      content: savedContent,
-      linecount: savedContent.text.lineIds.length,
-      lastUpdated: new Date().toLocaleString(),
-    };
-
     if (isLoggedIn) {
       const token = localStorage.getItem("userToken");
 
       try {
+        //id for backend is generated once it reaches the database 
         const backendDocument =
         {
-          title: newSavedFile.title,
+          title: `Saved Text ${new Date().toLocaleString()}`,
           textContent:
           {
             lineIds: text.lineIds,
@@ -251,11 +237,32 @@ function Texthooker() {
       return;
     } else {
 
+      //id for local is based on Date
+      //needlessly complex data structure but text needs to match the backend one if we don't feel like adding an if condition
+      const newSavedFile = {
+        id: Date.now(),
+        title: `Saved Text ${new Date().toLocaleString()}`,
+        category: "Uncategorized",
+        text: {
+          text: text
+        },
+        pages: pages,
+        linecount: text.lineIds.length,
+        lastUpdated: new Date().toLocaleString(),
+      };
+
+      if (file)
+        newSavedFile.id = file.id;
+
       const existingFiles = JSON.parse(localStorage.getItem("files")) || [];
+      const fileExists = existingFiles.some(file => file.id === newSavedFile.id);
+
+      //overwrites if exists. Appends otherwise
+      const updatedFiles = fileExists ? existingFiles.map(file => file.id === newSavedFile.id ? newSavedFile : file) : [...existingFiles, newSavedFile];
 
       localStorage.setItem(
         "files",
-        JSON.stringify([...existingFiles, newSavedFile])
+        JSON.stringify(updatedFiles)
       );
 
       setSaveMessage("Saved to local Library!");
