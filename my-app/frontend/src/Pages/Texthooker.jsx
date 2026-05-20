@@ -345,7 +345,7 @@ function Texthooker() {
           {/* Test line button */}
           <button
             onClick={handleAddTextLine}
-            className="mt-4 bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded text-white"
+            className="mt-4 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white"
           >
             Add Text Line
           </button>

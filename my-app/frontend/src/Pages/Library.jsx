@@ -251,7 +251,7 @@ useEffect(() => {
 
             <button
               onClick={handleAddCategory}
-              className="bg-purple-700 hover:bg-purple-800 px-4 py-3 rounded text-white"
+              className="bg-blue-500 hover:bg-blue-600 px-4 py-3 rounded text-white"
             >
               Add
             </button>
