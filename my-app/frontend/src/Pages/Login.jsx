@@ -94,12 +94,8 @@ function Login() {
           </div>
         </div>
       </main>
-
     </div>
   )
-
-
-
 }
 
 export default Login

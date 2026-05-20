@@ -339,7 +339,7 @@ function Texthooker() {
             Add Text Line
           </button>
         </div>
-        <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-2x1">
+        <div ref={textRef} className="whitespace-pre-wrap w-us-width h-us-height text-2xl">
           {pageText.map((ids) => (
             <div className="flex gap-2 items-center" key={ids}>
               <div>{text.lines[ids].text}</div>
