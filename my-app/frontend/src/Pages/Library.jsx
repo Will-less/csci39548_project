@@ -1,26 +1,28 @@
 import { useContext, useEffect, useState } from "react"
 import { data, useNavigate } from "react-router-dom"
 import { AuthContext } from "../Components/AuthContext.jsx"
+import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
 function Library() {
-//gets login state so library can load from database or localStorage
-const { isLoggedIn, userID } = useContext(AuthContext)
-//Loads saved files for logged out users from browser storage
-const [savedFiles, setSavedFiles] = useState(() => {
-  const saved = localStorage.getItem("files")
+  //gets login state so library can load from database or localStorage
+  const { isLoggedIn, userId } = useContext(AuthContext)
+  //Loads saved files for logged out users from browser storage
+  const [savedFiles, setSavedFiles] = useState(() => {
 
-  if (!saved) {
-    return []
-  }
+    const saved = localStorage.getItem("files")
 
-  try {
-    return JSON.parse(saved)
-  } catch {
-    return []
-  }
-})
+    if (!saved) {
+      return []
+    }
+
+    try {
+      return JSON.parse(saved)
+    } catch {
+      return []
+    }
+  })
 
   //tracks selected file and search/filter inputs
   const [selectedFile, setSelectedFile] = useState(null)
@@ -144,47 +146,41 @@ const [savedFiles, setSavedFiles] = useState(() => {
     setIsEditing(false)
   }
 
-//loads saved files fro database when the user is logged in
-useEffect(() => {
-  async function loadUserFiles() {
-    if (!isLoggedIn || !userID) {
-      return
-    }
-
-    try{
-      const response = await fetch(`${BASE_URL}/api/users/${userId}`)
-
-      if(!response.ok) {
-        throw new Error("Failed to load user files")
+  //loads saved files fro database when the user is logged in
+  useEffect(() => {
+    async function loadUserFiles() {
+      if (!isLoggedIn || !userId) {
+        return;
       }
 
-      const user = await response.json()
+      try {
+        const response = await axios.get(`${BASE_URL}/api/users/${userId}`)
 
-      const databaseFiles = user.text.map((doc) => ({
-        id: doc._id,
-        title: doc.title || "Untitled Document",
-        category: doc.category || "Uncategorized",
-        content: {
-          text: doc.textContent,
-          pages: doc.pages,
-        },
-        linecount: doc.textContent?.lineIds?.length || 0,
-        lastUpdated: "Saved to account",
-      }))
 
-      setSavedFiles(databaseFiles)
-      setSelectedFile(null)
-    } catch (error) {
-      console.error("Error loading account library:", error)
+        const databaseFiles = response.data.text.map((doc) => ({
+          id: doc._id,
+          title: doc.title || "Untitled Document",
+          category: doc.category || "Uncategorized",
+          text: {
+            text: doc.textContent,
+          },
+          pages: doc.pages.size,
+          linecount: doc.textContent?.lineIds?.length || 0,
+          lastUpdated: "Saved to account",
+        }))
+        setSavedFiles(databaseFiles)
+        setSelectedFile(null)
+      } catch (error) {
+        console.error("Error loading account library:", error)
+      }
     }
-  }
 
-  loadUserFiles()
-}, [isLoggedIn, userID])
+    loadUserFiles()
+  }, [isLoggedIn, userId])
 
   //saves files to browser storage whenever they change
   useEffect(() => {
-    if(!isLoggedIn) {
+    if (!isLoggedIn) {
       localStorage.setItem("files", JSON.stringify(savedFiles))
     }
   }, [savedFiles, isLoggedIn])
@@ -214,7 +210,7 @@ useEffect(() => {
             placeholder="Search saved files..."
             className="w-full px-4 py-3 rounded bg-[#111c33] border border-[#3f5f91] text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
           />
-          
+
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -393,8 +389,8 @@ useEffect(() => {
 
             <p className="text-sm mt-2">
               {savedFiles.length === 0
-              ? "Save text from Texthooker to see it here."
-              : "Try searching by title or category."}
+                ? "Save text from Texthooker to see it here."
+                : "Try searching by title or category."}
             </p>
           </div>
         )}
