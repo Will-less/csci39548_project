@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 import {useContext} from "react";
 import {AuthContext} from "./AuthContext";
@@ -9,6 +9,8 @@ const Navbar = () => {
 
   //needs context to deal with changes from user log in
   const {isLoggedIn, logout} = useContext(AuthContext);
+  console.log("TOKEN:", localStorage.getItem("userToken"));
+  console.log("Navbar isLoggedIn:", isLoggedIn);
   return (
     <nav className="bg-[#0f172a] text-white py-6 px-8">
       <div className="flex justify-between items-center max-w-6xl mx-auto text-sm">
@@ -27,7 +29,9 @@ const Navbar = () => {
             {/*Show when the user is logged in */}
             {isLoggedIn && (
               <button 
-              onClick={logout}
+              onClick={() => {
+                logout();
+              }}
               className="hover:text-gray-300"
               >
                 Logout

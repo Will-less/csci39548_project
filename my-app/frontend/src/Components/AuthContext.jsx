@@ -7,7 +7,7 @@ export const AuthAuthenticator = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
-
+  
   const handleLogin = (token) => {
     if (!token || typeof token !== 'string') {
       console.warn("bad token");
