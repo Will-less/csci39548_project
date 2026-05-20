@@ -12,7 +12,7 @@ const Navbar = () => {
   console.log("TOKEN:", localStorage.getItem("userToken"));
   console.log("Navbar isLoggedIn:", isLoggedIn);
   return (
-    <nav className="bg-[#0f172a] text-white py-6 px-8">
+    <nav className="bg-[#1c2641] text-white py-6 px-8">
       <div className="flex justify-between items-center max-w-6xl mx-auto text-sm">
         <p className="text-3xl font-semibold">Texthooker</p>
         <ul className="flex gap-6">

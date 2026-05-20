@@ -322,7 +322,7 @@ function Texthooker() {
         </p>
       )}
 
-      <div className="flex justify-center ">
+      <div className="flex justify-center bg-[#0f172a] text-white">
         <div className="flex-1">
           current page: {pageNum + 1}
           <div>total lines: {text.lineIds.length}</div>
