@@ -222,45 +222,37 @@ function Texthooker() {
       lastUpdated: new Date().toLocaleString(),
     };
 
-    if (isLoggedIn) {
+    if(isLoggedIn) 
+    {
       const token = localStorage.getItem("userToken");
 
       try {
-        /*
-                const response = await fetch(`${BASE_URL}/api/users/save`, {
-                  method: "PATCH",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    text: {
-                      title: newSavedFile.title,
-                      textContent: text,
-                      pages: pages,
-                    },
-                  }),
-                });
-        */
-
-        const response = await axios.patch(`${BASE_URL}/api/users/save`, { text: text },
+        const backendDocument = 
+        {
+          title: newSavedFile.title,
+          category: newSavedFile.category,
+          textContent: 
           {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
+            lineIds: text.lineIds,
+            lines: text.lines,
+            currLine: text.currLine,
+          },
+          pages: pages,
+          linecount: text.lineIds.length,
+          lastUpdated: new Date().toISOString(),
+        };
 
-        if (!response.ok) {
-          throw new Error(`Database save failed:${response.statusText}`);
+        const response = await axios.patch(`${BASE_URL}/api/users/save`, {text: backendDocument,},{headers: {Authorization: `Bearer ${token}`,"Content-Type": "application/json",},});
+
+        if (response.status !== 200) 
+        {
+          throw new Error("Database save failed");
         }
-
         setSaveMessage("Saved to account Library!");
       } catch (error) {
         console.error(error);
         setSaveMessage("Could not save to account.");
       }
-
       return;
     }
 
