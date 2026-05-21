@@ -9,20 +9,22 @@ function Library() {
   //gets login state so library can load from database or localStorage
   const { isLoggedIn, userId } = useContext(AuthContext)
   //Loads saved files for logged out users from browser storage
-  const [savedFiles, setSavedFiles] = useState(() => {
+  const [savedFiles, setSavedFiles] = useState([]) //=> {
 
-    const saved = localStorage.getItem("files")
+  /*
+  const saved = localStorage.getItem("files")
 
-    if (!saved) {
-      return []
-    }
+  if (!saved) {
+    return []
+  }
 
-    try {
-      return JSON.parse(saved)
-    } catch {
-      return []
-    }
-  })
+  try {
+    return JSON.parse(saved)
+  } catch {
+    return []
+  }
+})
+*/
 
   //tracks selected file and search/filter inputs
   const [selectedFile, setSelectedFile] = useState(null)
@@ -150,6 +152,8 @@ function Library() {
   useEffect(() => {
     async function loadUserFiles() {
       if (!isLoggedIn || !userId) {
+        const localData = JSON.parse(localStorage.getItem("files")) || [];
+        setSavedFiles(localData);
         return;
       }
 
@@ -179,11 +183,13 @@ function Library() {
   }, [isLoggedIn, userId])
 
   //saves files to browser storage whenever they change
+  /*
   useEffect(() => {
     if (!isLoggedIn) {
       localStorage.setItem("files", JSON.stringify(savedFiles))
     }
-  }, [savedFiles, isLoggedIn])
+  }, [savedFiles])
+  */
 
   //saves custom categories 
   useEffect(() => {
