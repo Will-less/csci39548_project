@@ -117,10 +117,34 @@ function Library() {
 
   //delete saved file from library
   function handleDeleteFile(fileId) {
-    const updateFiles = savedFiles.filter((file) => file.id !== fileId)
+    if (!isLoggedIn) {
+      const updateFiles = savedFiles.filter((file) => file.id !== fileId)
+      localStorage.setItem('files', JSON.stringify(updateFiles));
+      setSavedFiles(updateFiles);
+    } else {
+      const token = localStorage.getItem("userToken");
+      try {
+        async function deleteUserFile() {
+          const response = await axios.delete(
+            `${BASE_URL}/api/users/delete/${fileId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              }
+            }
+          );
+          console.log('deleted: ', response.data);
+        }
+        deleteUserFile();
+        const updateFiles = savedFiles.filter((file) => file.id !== fileId);
+        setSavedFiles(updateFiles);
 
-    setSavedFiles(updateFiles)
-    setSelectedFile(null)
+      } catch (error) {
+        console.error('Could not delete document: ', error);
+      }
+    }
+    setSelectedFile(null);
   }
 
   //saves updated title/ category for selected title

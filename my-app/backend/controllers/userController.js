@@ -1,6 +1,7 @@
 import User from '../schema/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 //get
 export const getUser = async (req, res) => {
@@ -89,6 +90,42 @@ export const overwriteText = async (req, res) => {
   }
 }
 
+//delete
+export const deleteText = async (req, res) => {
+  try {
+    const id = req.user.id;
+    const { textId } = req.params;
+    console.log(textId);
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "user somehow not found" });
+    }
+
+    const converted = new mongoose.Types.ObjectId(textId)
+
+    user.text.pull({ _id: converted });
+
+    /*
+    const deletedText = await User.findOneAndUpdate({
+      _id: id,
+    }, {
+      $pull: {
+        text: { _id: converted }
+      }
+    },
+      { returnDocument: 'after' }
+    );
+    */
+    await user.save();
+
+    res.status(200).json(user);
+  }
+  catch (error) {
+    res.status(500).json({ error: error.message, error_stack: error.stack });
+  }
+}
+
 export const authUser = async (req, res, next) => {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer')) {
@@ -106,6 +143,7 @@ export const authUser = async (req, res, next) => {
   }
 }
 
+//maybe add if we have time
 export const deleteUser = async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id)
