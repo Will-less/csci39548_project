@@ -85,7 +85,7 @@ function useTextractor({ setText, setConnected }) {
   }, []);
 }
 
-function useManual({ text, connected, setText, page, pages }) {
+function useManual({ connected, setText }) {
   const updateText = async () => {
     try {
       let clip = await navigator.clipboard.readText();
@@ -117,12 +117,12 @@ function usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setP
     const sh = textRef.current.scrollHeight;
     const oh = textRef.current.offsetHeight;
 
-    console.log(sh);
-    console.log(oh);
+    //console.log(sh);
+    //console.log(oh);
 
     if ((pageNum + 1) === pages.length && sh > oh) {
       const newNum = text.currLine;
-      const newPage = { id: crypto.randomUUID(), offset: newNum };
+      const newPage = { pageId: crypto.randomUUID(), offset: newNum };
       const newPageNum = pageNum + 1;
       setPageNum(newPageNum);
       setPage(newPage);
@@ -165,14 +165,14 @@ function Texthooker() {
   const location = useLocation()
   const file = location.state;
   const { isLoggedIn, userId } = useContext(AuthContext);
-  console.log("I have the userid: ", userId);
+  // console.log("I have the userid: ", userId);
 
 
   //for Textractor connection 
   const [connected, setConnected] = useState(true);
   //TODO: convert pages to json object - add to pages map 
   const [page, setPage] = useState(() => ({
-    id: crypto.randomUUID(),
+    pageId: crypto.randomUUID(),
     offset: 0,
   }));
   const [pageNum, setPageNum] = useState(0);
@@ -190,9 +190,9 @@ function Texthooker() {
 
   useEffect(() => {
     if (file) {
-      setText(file.content.text);
-      setPages(file.content.pages);
-
+      //      console.log("obama", file.id);
+      setText(file.text.text);
+      setPages(file.pages);
     }
   }, [file]);
 
@@ -213,49 +213,38 @@ function Texthooker() {
   }, [saveMessage]);
 
   useTextractor({ setText, setConnected });
-  useManual({ text, connected, setText, page, pages });
+  useManual({ connected, setText });
   usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
 
   //Saves text to database when logged in, else saves to localStorage
   async function handleSaveToLibrary() {
-    const savedContent = {
-      pages: pages,
-      text: text,
-    };
-
-    const newSavedFile = {
-      id: Date.now(),
-      title: `Saved Text ${new Date().toLocaleString()}`,
-      category: "Uncategorized",
-      content: savedContent,
-      linecount: savedContent.text.lineIds.length,
-      lastUpdated: new Date().toLocaleString(),
-    };
-
-    if(isLoggedIn) 
-    {
+    if (isLoggedIn) {
       const token = localStorage.getItem("userToken");
 
       try {
-        const backendDocument = 
+        //id for backend is generated once it reaches the database 
+        const backendDocument =
         {
-          title: newSavedFile.title,
-          category: newSavedFile.category,
-          textContent: 
+          title: `Saved Text ${new Date().toLocaleString()}`,
+          textContent:
           {
             lineIds: text.lineIds,
             lines: text.lines,
             currLine: text.currLine,
           },
           pages: pages,
-          linecount: text.lineIds.length,
-          lastUpdated: new Date().toISOString(),
         };
 
-        const response = await axios.patch(`${BASE_URL}/api/users/save`, {text: backendDocument,},{headers: {Authorization: `Bearer ${token}`,"Content-Type": "application/json",},});
+        let response;
+        if (!file) {
+          response = await axios.patch(`${BASE_URL}/api/users/save`, { text: backendDocument, },
+            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", }, });
+        } else {
+          response = await axios.patch(`${BASE_URL}/api/users/overwrite/${file.id}`, { text: backendDocument },
+            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", }, });
+        }
 
-        if (response.status !== 200) 
-        {
+        if (response.status !== 200) {
           throw new Error("Database save failed");
         }
         setSaveMessage("Saved to account Library!");
@@ -264,16 +253,39 @@ function Texthooker() {
         setSaveMessage("Could not save to account.");
       }
       return;
+    } else {
+
+      //id for local is based on Date
+      //needlessly complex data structure but text needs to match the backend one, and I don't feel like changing the structure
+      //title cufrently changes with each save, but the id is still the same.
+      const newSavedFile = {
+        id: Date.now(),
+        title: `Saved Text ${new Date().toLocaleString()}`,
+        category: "Uncategorized",
+        text: {
+          text: text
+        },
+        pages: pages,
+        linecount: text.lineIds.length,
+        lastUpdated: new Date().toLocaleString(),
+      };
+
+      if (file)
+        newSavedFile.id = file.id;
+
+      const existingFiles = JSON.parse(localStorage.getItem("files")) || [];
+      const fileExists = existingFiles.some(file => file.id === newSavedFile.id);
+
+      //overwrites if exists. Appends otherwise
+      const updatedFiles = fileExists ? existingFiles.map(file => file.id === newSavedFile.id ? newSavedFile : file) : [...existingFiles, newSavedFile];
+
+      localStorage.setItem(
+        "files",
+        JSON.stringify(updatedFiles)
+      );
+
+      setSaveMessage("Saved to local Library!");
     }
-
-    const existingFiles = JSON.parse(localStorage.getItem("files")) || [];
-
-    localStorage.setItem(
-      "files",
-      JSON.stringify([...existingFiles, newSavedFile])
-    );
-
-    setSaveMessage("Saved to local Library!");
   }
 
   function goToPage(pageNumber) {
@@ -362,7 +374,7 @@ function Texthooker() {
         </div>
         <div className="flex-1">
           {pages.map((page, index) => (
-            <div key={page.id}><button onClick={() => goToPage(index)}>{page.id} | {index + 1} - {page.offset}</button></div>
+            <div key={page.pageId}><button onClick={() => goToPage(index)}>{page.pageId} | {index + 1} - {page.offset}</button></div>
           ))}
         </div>
       </div>

@@ -1,14 +1,17 @@
 import { useContext, useEffect, useState } from "react"
 import { data, useNavigate } from "react-router-dom"
 import { AuthContext } from "../Components/AuthContext.jsx"
+import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
 function Library() {
-//gets login state so library can load from database or localStorage
-const { isLoggedIn, userID } = useContext(AuthContext)
-//Loads saved files for logged out users from browser storage
-const [savedFiles, setSavedFiles] = useState(() => {
+  //gets login state so library can load from database or localStorage
+  const { isLoggedIn, userId } = useContext(AuthContext)
+  //Loads saved files for logged out users from browser storage
+  const [savedFiles, setSavedFiles] = useState([]) //=> {
+
+  /*
   const saved = localStorage.getItem("files")
 
   if (!saved) {
@@ -21,6 +24,7 @@ const [savedFiles, setSavedFiles] = useState(() => {
     return []
   }
 })
+*/
 
   //tracks selected file and search/filter inputs
   const [selectedFile, setSelectedFile] = useState(null)
@@ -113,10 +117,34 @@ const [savedFiles, setSavedFiles] = useState(() => {
 
   //delete saved file from library
   function handleDeleteFile(fileId) {
-    const updateFiles = savedFiles.filter((file) => file.id !== fileId)
+    if (!isLoggedIn) {
+      const updateFiles = savedFiles.filter((file) => file.id !== fileId)
+      localStorage.setItem('files', JSON.stringify(updateFiles));
+      setSavedFiles(updateFiles);
+    } else {
+      const token = localStorage.getItem("userToken");
+      try {
+        async function deleteUserFile() {
+          const response = await axios.delete(
+            `${BASE_URL}/api/users/delete/${fileId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              }
+            }
+          );
+          console.log('deleted: ', response.data);
+        }
+        deleteUserFile();
+        const updateFiles = savedFiles.filter((file) => file.id !== fileId);
+        setSavedFiles(updateFiles);
 
-    setSavedFiles(updateFiles)
-    setSelectedFile(null)
+      } catch (error) {
+        console.error('Could not delete document: ', error);
+      }
+    }
+    setSelectedFile(null);
   }
 
   //saves updated title/ category for selected title
@@ -144,50 +172,48 @@ const [savedFiles, setSavedFiles] = useState(() => {
     setIsEditing(false)
   }
 
-//loads saved files fro database when the user is logged in
-useEffect(() => {
-  async function loadUserFiles() {
-    if (!isLoggedIn || !userID) {
-      return
-    }
-
-    try{
-      const response = await fetch(`${BASE_URL}/api/users/${userId}`)
-
-      if(!response.ok) {
-        throw new Error("Failed to load user files")
+  //loads saved files fro database when the user is logged in
+  useEffect(() => {
+    async function loadUserFiles() {
+      if (!isLoggedIn || !userId) {
+        const localData = JSON.parse(localStorage.getItem("files")) || [];
+        setSavedFiles(localData);
+        return;
       }
 
-      const user = await response.json()
+      try {
+        const response = await axios.get(`${BASE_URL}/api/users/${userId}`)
 
-      const databaseFiles = user.text.map((doc) => ({
-        id: doc._id,
-        title: doc.title || "Untitled Document",
-        category: doc.category || "Uncategorized",
-        content: {
-          text: doc.textContent,
+        const databaseFiles = response.data.text.map((doc) => ({
+          id: doc._id,
+          title: doc.title || "Untitled Document",
+          category: doc.category || "Uncategorized",
+          text: {
+            text: doc.textContent,
+          },
           pages: doc.pages,
-        },
-        linecount: doc.textContent?.lineIds?.length || 0,
-        lastUpdated: "Saved to account",
-      }))
+          linecount: doc.textContent?.lineIds?.length || 0,
+          lastUpdated: "Saved to account",
+        }))
 
-      setSavedFiles(databaseFiles)
-      setSelectedFile(null)
-    } catch (error) {
-      console.error("Error loading account library:", error)
+        setSavedFiles(databaseFiles)
+        setSelectedFile(null)
+      } catch (error) {
+        console.error("Error loading account library:", error)
+      }
     }
-  }
 
-  loadUserFiles()
-}, [isLoggedIn, userID])
+    loadUserFiles()
+  }, [isLoggedIn, userId])
 
   //saves files to browser storage whenever they change
+  /*
   useEffect(() => {
-    if(!isLoggedIn) {
+    if (!isLoggedIn) {
       localStorage.setItem("files", JSON.stringify(savedFiles))
     }
-  }, [savedFiles, isLoggedIn])
+  }, [savedFiles])
+  */
 
   //saves custom categories 
   useEffect(() => {
@@ -214,7 +240,7 @@ useEffect(() => {
             placeholder="Search saved files..."
             className="w-full px-4 py-3 rounded bg-[#111c33] border border-[#3f5f91] text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
           />
-          
+
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -349,7 +375,12 @@ useEffect(() => {
                 </button>
               )}
               <button
-                onClick={() => navigate("/Texthooker", { state: selectedFile })}
+                onClick={() => {
+                  // console.log(selectedFile.pages);
+                  //console.log(selectedFile.text.text);
+                  navigate("/Texthooker", { state: selectedFile })
+                }
+                }
                 className="bg-purple-700 hover:bg-purple-800 px-6 py-3 rounded text-white "
               >
                 Open file
@@ -382,51 +413,56 @@ useEffect(() => {
               </button>
             </div>
           </div>
-        )}
+        )
+        }
 
         {/* Message when no files match search/filter */}
-        {filteredFiles.length === 0 && (
-          <div className="text-center text-gray-400 mt-8">
-            <p className="text-xl">
-              {savedFiles.length === 0 ? "No saved files yet." : "No matching files found."}
-            </p>
+        {
+          filteredFiles.length === 0 && (
+            <div className="text-center text-gray-400 mt-8">
+              <p className="text-xl">
+                {savedFiles.length === 0 ? "No saved files yet." : "No matching files found."}
+              </p>
 
-            <p className="text-sm mt-2">
-              {savedFiles.length === 0
-              ? "Save text from Texthooker to see it here."
-              : "Try searching by title or category."}
-            </p>
-          </div>
-        )}
+              <p className="text-sm mt-2">
+                {savedFiles.length === 0
+                  ? "Save text from Texthooker to see it here."
+                  : "Try searching by title or category."}
+              </p>
+            </div>
+          )
+        }
         {/* grid of saved file cards */}
-        {filteredFiles.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-5xl mx-auto">
-            {filteredFiles.map((file) => (
-              <div
-                key={file.id}
-                onClick={() => {
-                  setSelectedFile(file)
-                  setEditedTitle(file.title)
-                  setEditedCategory(file.category)
-                  setIsEditing(false)
-                }}
-                className="w-full min-h-35 bg-[#334a70] border border-[#3f5f91] rounded-lg flex flex-col items-center justify-center text-center hover:bg-[#3f5f91] hover:scale-105 transition duration-200 cursor-pointer p-6 shadow-lg"
-              >
-                <p className="text-xl font-medium">{file.title}</p>
-                <p className="text-sm text-gray-300 mt-1">{file.category}</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {file.linecount} lines saved
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Updated {file.lastUpdated}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+        {
+          filteredFiles.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-5xl mx-auto">
+              {filteredFiles.map((file) => (
+                <div
+                  key={file.id}
+                  onClick={() => {
+                    setSelectedFile(file)
+                    setEditedTitle(file.title)
+                    setEditedCategory(file.category)
+                    setIsEditing(false)
+                  }}
+                  className="w-full min-h-35 bg-[#334a70] border border-[#3f5f91] rounded-lg flex flex-col items-center justify-center text-center hover:bg-[#3f5f91] hover:scale-105 transition duration-200 cursor-pointer p-6 shadow-lg"
+                >
+                  <p className="text-xl font-medium">{file.title}</p>
+                  <p className="text-sm text-gray-300 mt-1">{file.category}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {file.linecount} lines saved
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Updated {file.lastUpdated}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )
+        }
 
-      </main>
-    </div>
+      </main >
+    </div >
   )
 }
 export default Library
