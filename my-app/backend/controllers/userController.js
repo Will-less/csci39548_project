@@ -45,11 +45,9 @@ export const createUser = async (req, res) => {
 };
 
 //update  - separate from email/password update; PATCH
-//need to manually construct the schema
-//structure it in the frontend
-export const updateUser = async (req, res) => {
+//appends, so use this for storing new documents 
+export const updateText = async (req, res) => {
   try {
-    console.log("help me");
     const { text } = req.body;
 
     const id = req.user.id;
@@ -61,8 +59,33 @@ export const updateUser = async (req, res) => {
     );
     return res.status(200).json({ status: "success", data: updatedUser });
   } catch (error) {
-    console.log("joe");
     res.status(400).json({ status: "fail", message: error.message });
+  }
+}
+
+//overwrites text and is to be called when there is an existing id 
+//also patch 
+export const overwriteText = async (req, res) => {
+  try {
+    const { text } = req.body;
+    const id = req.user.id;
+    const { textId } = req.params;
+
+    const newDocument = {
+      ...text,
+      _id: textId
+    }
+
+    const updatedUser = await User.findOneAndUpdate({
+      _id: id,
+      "text._id": textId
+    }, {
+      $set: { "text.$": newDocument }
+    }, { returnDocument: 'after' }
+    );
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 }
 

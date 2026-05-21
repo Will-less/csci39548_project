@@ -85,7 +85,7 @@ function useTextractor({ setText, setConnected }) {
   }, []);
 }
 
-function useManual({ text, connected, setText, page, pages }) {
+function useManual({ connected, setText }) {
   const updateText = async () => {
     try {
       let clip = await navigator.clipboard.readText();
@@ -202,7 +202,7 @@ function Texthooker() {
   const [saveMessage, setSaveMessage] = useState("")
 
   useTextractor({ setText, setConnected });
-  useManual({ text, connected, setText, page, pages });
+  useManual({ connected, setText });
   usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
 
   //Saves text to database when logged in, else saves to localStorage
@@ -239,6 +239,7 @@ function Texthooker() {
 
       //id for local is based on Date
       //needlessly complex data structure but text needs to match the backend one if we don't feel like adding an if condition
+      //title cufrently changes with each save, but the id is still the same.
       const newSavedFile = {
         id: Date.now(),
         title: `Saved Text ${new Date().toLocaleString()}`,
