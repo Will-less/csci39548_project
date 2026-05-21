@@ -122,7 +122,7 @@ function usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setP
 
     if ((pageNum + 1) === pages.length && sh > oh) {
       const newNum = text.currLine;
-      const newPage = { id: crypto.randomUUID(), offset: newNum };
+      const newPage = { pageId: crypto.randomUUID(), offset: newNum };
       const newPageNum = pageNum + 1;
       setPageNum(newPageNum);
       setPage(newPage);
@@ -225,7 +225,14 @@ function Texthooker() {
           pages: pages,
         };
 
-        const response = await axios.patch(`${BASE_URL}/api/users/save`, { text: backendDocument, }, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", }, });
+        let response;
+        if (!file) {
+          response = await axios.patch(`${BASE_URL}/api/users/save`, { text: backendDocument, },
+            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", }, });
+        } else {
+          response = await axios.patch(`${BASE_URL}/api/users/overwrite/${file.id}`, { text: backendDocument },
+            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", }, });
+        }
 
         if (response.status !== 200) {
           throw new Error("Database save failed");
@@ -239,7 +246,7 @@ function Texthooker() {
     } else {
 
       //id for local is based on Date
-      //needlessly complex data structure but text needs to match the backend one if we don't feel like adding an if condition
+      //needlessly complex data structure but text needs to match the backend one, and I don't feel like changing the structure
       //title cufrently changes with each save, but the id is still the same.
       const newSavedFile = {
         id: Date.now(),
