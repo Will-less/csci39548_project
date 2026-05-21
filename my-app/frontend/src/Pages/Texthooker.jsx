@@ -202,6 +202,16 @@ function Texthooker() {
   //feedback after saving text to library
   const [saveMessage, setSaveMessage] = useState("")
 
+  useEffect(() => {
+    if (!saveMessage) return;
+
+    const timer = setTimeout(() => {
+      setSaveMessage("");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [saveMessage]);
+
   useTextractor({ setText, setConnected });
   useManual({ text, connected, setText, page, pages });
   usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setPages })
@@ -309,7 +319,7 @@ function Texthooker() {
   return (
     <>
       {saveMessage && (
-        <p className="text-green-400 text-center mt-4">
+        <p className="bg-[#0b1320] text-white text-center">
           {saveMessage}
         </p>
       )}
