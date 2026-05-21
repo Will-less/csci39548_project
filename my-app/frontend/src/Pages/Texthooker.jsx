@@ -117,8 +117,8 @@ function usePaginator({ text, textRef, pageNum, setPageNum, setPage, pages, setP
     const sh = textRef.current.scrollHeight;
     const oh = textRef.current.offsetHeight;
 
-    console.log(sh);
-    console.log(oh);
+    //console.log(sh);
+    //console.log(oh);
 
     if ((pageNum + 1) === pages.length && sh > oh) {
       const newNum = text.currLine;
@@ -165,14 +165,14 @@ function Texthooker() {
   const location = useLocation()
   const file = location.state;
   const { isLoggedIn, userId } = useContext(AuthContext);
-  console.log("I have the userid: ", userId);
+  // console.log("I have the userid: ", userId);
 
 
   //for Textractor connection 
   const [connected, setConnected] = useState(true);
   //TODO: convert pages to json object - add to pages map 
   const [page, setPage] = useState(() => ({
-    id: crypto.randomUUID(),
+    pageId: crypto.randomUUID(),
     offset: 0,
   }));
   const [pageNum, setPageNum] = useState(0);
@@ -190,6 +190,7 @@ function Texthooker() {
 
   useEffect(() => {
     if (file) {
+      //      console.log("obama", file.id);
       setText(file.text.text);
       setPages(file.pages);
     }
@@ -356,7 +357,7 @@ function Texthooker() {
         </div>
         <div className="flex-1">
           {pages.map((page, index) => (
-            <div key={page.id}><button onClick={() => goToPage(index)}>{page.id} | {index + 1} - {page.offset}</button></div>
+            <div key={page.pageId}><button onClick={() => goToPage(index)}>{page.pageId} | {index + 1} - {page.offset}</button></div>
           ))}
         </div>
       </div>
