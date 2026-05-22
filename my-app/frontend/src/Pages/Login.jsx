@@ -21,7 +21,6 @@ function Login() {
       const response = await axios.post(`${BASE_URL}/api/users/login`, { email, password });
       const token = response.data.token;
       login(token);
-      console.log(token)
       navbar("/Library");
     } catch (error) {
       if (error.response) {
