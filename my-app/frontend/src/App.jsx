@@ -19,16 +19,16 @@ function App() {
 
   return (
     <>
-      <NavBar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/Login" element={<Login />} />
-        <Route path="/Signup" element={<Signup />} />
-        <Route path="/Library" element={<Library />} />
-        <Route path="/Texthooker" element={<Texthooker />} />
-        <Route path="*" element={<Nil />} />
-      </Routes>
-      {location.pathname !== excludeFooter && <Footer />}
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/Login" element={<Login />} />
+          <Route path="/Signup" element={<Signup />} />
+          <Route path="/Library" element={<Library />} />
+          <Route path="/Texthooker" element={<Texthooker />} />
+          <Route path="*" element={<Nil />} />
+        </Routes>
+        {location.pathname !== excludeFooter && <Footer />}
     </>
   )
 }

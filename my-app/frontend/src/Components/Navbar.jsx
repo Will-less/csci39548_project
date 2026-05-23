@@ -13,9 +13,9 @@ const Navbar = () => {
   // console.log("Navbar isLoggedIn:", isLoggedIn);
   return (
     <nav className="bg-[#1c2641] text-white py-6 px-8">
-      <div className="flex justify-between items-center max-w-6xl mx-auto text-sm">
-        <p className="text-3xl font-semibold">Texthooker</p>
-        <ul className="flex gap-6">
+      <div className="flex flex-wrap px-4 justify-between items-center max-w-6xl mx-auto text-sm">
+        <p className="text-3xl sm:text-4xl font-bold">Texthooker</p>
+        <ul className="flex flex-wrap gap-6 text-sm sm:text-base">
           <NavLink to="/">Home</NavLink>
           <NavLink to="/Library">Library</NavLink>
           <NavLink to="/Texthooker">Extract</NavLink>
